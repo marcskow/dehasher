@@ -1,0 +1,6 @@
+.idea/
+target/
+project/
+!project/plugins.sbt
+!project/build.properties
+*.sc
