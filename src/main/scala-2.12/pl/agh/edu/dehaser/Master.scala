@@ -19,7 +19,7 @@ class Master(hash: String, algo: String) extends Actor {
       allowLocalRoutees = true, useRole = None)).props(Props(classOf[Worker], defaultAlphabet)),
     name = "workerRouter3")
 
-  (1 to nrOfWords).grouped(atomSize).map(x => x.head to x.last).foreach(range => workerRouter ! Check(range, hash, algo))
+  (1L to nrOfWords).grouped(atomSize).map(x => x.head to x.last).foreach(range => workerRouter ! Check(range, hash, algo))
 
   override def receive: Receive = {
     case FoundIt =>

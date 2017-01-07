@@ -8,7 +8,7 @@ import akka.actor.Actor
 import scala.annotation.tailrec
 
 //  todo create worker, with range that is recursively consumend unless there comes terminate or split message
-class Worker(alphabet: String) extends Actor {
+class Worker(alphabet: String) extends Actor with Dehash {
 
 
   override def receive: Receive = {
@@ -37,8 +37,8 @@ class Worker(alphabet: String) extends Actor {
     val md = MessageDigest.getInstance(algo)
     md.update(input.getBytes("UTF-8"))
     val bytes = md.digest
-    String.format("%064x", new BigInteger(1, bytes))
+    val format = if (algo == "SHA-256") "%064x" else "%032x"
+    String.format(format, new BigInteger(1, bytes))
   }
-
 
 }
