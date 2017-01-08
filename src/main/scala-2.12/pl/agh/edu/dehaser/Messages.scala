@@ -11,7 +11,7 @@ case class ComputeRange(start: String, end: String, hashToCrack: String, algorit
 
 case class giveHalf(actorRef: ActorRef) extends Messages
 
-case class dehashIt(hash: String, algo: String) extends Messages
+case class DehashIt(hash: String, algo: String) extends Messages
 
 case class Check(range: NumericRange[Long], hash: String, algo: String)
 

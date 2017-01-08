@@ -8,11 +8,16 @@ import akka.actor.Actor
 import scala.annotation.tailrec
 
 //  todo create worker, with range that is recursively consumend unless there comes terminate or split message
-class Worker(alphabet: String) extends Actor with Dehash {
+class DehashWorker extends Actor with Dehash {
+  // TODO: restrore normal alphabet
+  //  val alphabet: String = """ !\"#$%&\\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"""
+  val alphabet: String = "abcdefghijklmnopqrstuvwxyz"
 
 
   override def receive: Receive = {
     case Check(range, hash, algo) =>
+      // TODO:  println
+      println(s"I've got range:$range")
       val foundOption = range.map(x => getWord(x, alphabet, ""))
         .map(x => x -> hasher(x, algo)).find(x => x._2.equals(hash)).map(_._1)
       foundOption match {

@@ -7,7 +7,7 @@ import org.scalatest.prop.{TableDrivenPropertyChecks, TableFor6}
 
 import scala.collection.immutable.NumericRange.Inclusive
 
-class WorkerTest extends TestKit(ActorSystem("NodeActorSpec")) with ImplicitSender
+class dehashWorkerTest extends TestKit(ActorSystem("NodeActorSpec")) with ImplicitSender
   with FunSpecLike with GivenWhenThen with Matchers with TableDrivenPropertyChecks with Dehash with BeforeAndAfterAll {
 
   override def afterAll {
@@ -40,7 +40,7 @@ class WorkerTest extends TestKit(ActorSystem("NodeActorSpec")) with ImplicitSend
 
       forAll(hashes) { (hash, dehashed, algo, alphabet, range, message) =>
         Given(s"alphabet: $alphabet  \n hash: $hash \n algo: $algo \n range: $range ")
-        val worker = system.actorOf(Props(classOf[Worker], alphabet))
+        val worker = system.actorOf(Props(classOf[DehashWorker], alphabet))
 
         When("Check message is send")
         worker ! Check(range, hash, algo)
