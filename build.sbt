@@ -10,7 +10,9 @@ libraryDependencies ++= Seq(
   // Akka
   "com.typesafe.akka" %% "akka-cluster" % akkaVersion,
   "com.typesafe.akka" %% "akka-actor" % akkaVersion,
-  "com.typesafe.akka" %% "akka-testkit" % akkaVersion
+  "com.typesafe.akka" %% "akka-testkit" % akkaVersion //,
+  //  "com.typesafe.akka" %% "akka-stream_2.12" % akkaVersion
+
   //,"com.typesafe.akka" %% "akka-cluster-tools" % akkaVersion,
   //"com.typesafe.akka" %% "akka-cluster-metrics" % akkaVersion
   //"com.typesafe.akka" %% "akka-remote" % akkaVersion,

@@ -10,7 +10,7 @@ import com.typesafe.config.ConfigFactory
 import scala.collection.immutable.Seq
 import scala.concurrent.duration._
 
-object MainSample {
+object MainSample extends Dehash {
   def main(args: Array[String]): Unit = {
     startup(args)
   }
@@ -25,7 +25,7 @@ object MainSample {
 
       val system = ActorSystem("ClusterSystem", config)
 
-      system.actorOf(Props[DehashWorker], name = "dehashWorker")
+      system.actorOf(DehashWorker.props(defaultAlphabet), name = "dehashWorker")
       system.actorOf(DehashService.props, name = "dehashService")
       //      system.actorOf(Props(), name = "dehashService")
     }

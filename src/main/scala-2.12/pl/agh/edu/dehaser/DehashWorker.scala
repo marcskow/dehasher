@@ -3,15 +3,12 @@ package pl.agh.edu.dehaser
 import java.math.BigInteger
 import java.security.MessageDigest
 
-import akka.actor.Actor
+import akka.actor.{Actor, Props}
 
 import scala.annotation.tailrec
 
 //  todo create worker, with range that is recursively consumend unless there comes terminate or split message
-class DehashWorker extends Actor with Dehash {
-  // TODO: restrore normal alphabet
-  //  val alphabet: String = """ !\"#$%&\\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"""
-  val alphabet: String = "abcdefghijklmnopqrstuvwxyz"
+class DehashWorker(alphabet: String) extends Actor with Dehash {
 
 
   override def receive: Receive = {
@@ -27,7 +24,7 @@ class DehashWorker extends Actor with Dehash {
   }
 
   @tailrec
-  private def getWord(iterator: Long, alphabet: String, accumulator: String): String = {
+  private def getWord(iterator: BigInt, alphabet: String, accumulator: String): String = {
     if (iterator == 0) accumulator
     else {
       val modulo = (iterator - 1) % alphabet.length
@@ -46,4 +43,8 @@ class DehashWorker extends Actor with Dehash {
     String.format(format, new BigInteger(1, bytes))
   }
 
+}
+
+object DehashWorker {
+  def props(alphabet: String): Props = Props(new DehashWorker(alphabet))
 }
