@@ -2,24 +2,37 @@ package pl.agh.edu.dehaser
 
 import scala.collection.immutable.{Iterable, NumericRange}
 
-class BigRangeIterator(start: BigInt, end: BigInt, step: Int) extends Iterator[NumericRange[BigInt]] {
-  private var nextValue = start until (start + step)
+case class BigRange(start: BigInt, end: BigInt)
 
-  def hasNext: Boolean = end + 2 > nextValue.end
+class BigRangeIterator(range: BigRange) extends Iterator[NumericRange[BigInt]] with Dehash {
+  private var nextValue = range.start until (range.start + atomSize)
 
-  def next: NumericRange[BigInt] = {
+  override def hasNext: Boolean = range.end >= nextValue.start
+
+  override def next: NumericRange[BigInt] = {
     val current = nextValue
     //noinspection ScalaUnnecessaryParentheses
-    nextValue = (nextValue.end) until (step + nextValue.end)
+    nextValue = (nextValue.end) until (atomSize + nextValue.end)
     current
+  }
+
+  def split(): Option[(BigRange, BigRange)] = {
+    val length = range.end - nextValue.start + 1
+    val atomLength = length / atomSize
+    if (length < splitThreshold) None
+    else {
+      val half: BigInt = (atomLength / 2) * atomSize
+      //noinspection ScalaUnnecessaryParentheses
+      val split: BigInt = (nextValue.start) + half
+      Some(BigRange(nextValue.start, split), BigRange(split, range.end + 1))
+    }
   }
 }
 
-class BigRangeIterable(start: BigInt, end: BigInt, step: Int) extends Iterable[NumericRange[BigInt]] {
-  //  def apply(start: BigInt, end: BigInt, step: Int = 1): BigRangeIterator = //new BigRangeIterator(start, end, step)
-  override def iterator: Iterator[NumericRange[BigInt]] = new BigRangeIterator(start, end, step)
+class BigRangeIterable(range: BigRange) extends Iterable[NumericRange[BigInt]] {
+  override def iterator: BigRangeIterator = new BigRangeIterator(range)
 }
 
 object BigRangeIterable {
-  def apply(start: BigInt, end: BigInt, step: Int): BigRangeIterable = new BigRangeIterable(start, end, step)
+  def apply(range: BigRange): BigRangeIterable = new BigRangeIterable(range)
 }

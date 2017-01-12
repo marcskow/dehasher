@@ -12,7 +12,7 @@ class DehashWorker(alphabet: String) extends Actor with Dehash {
 
 
   override def receive: Receive = {
-    case Check(range, hash, algo) =>
+    case Check(range, WorkDetails(hash, algo)) =>
       // TODO:  println
       println(s"I've got range:$range")
       val foundOption = range.map(x => getWord(x, alphabet, ""))

@@ -43,7 +43,7 @@ class dehashWorkerTest extends TestKit(ActorSystem("NodeActorSpec")) with Implic
         val worker = system.actorOf(DehashWorker.props(alphabet))
 
         When("Check message is send")
-        worker ! Check(range, hash, algo)
+        worker ! Check(range, WorkDetails(hash, algo))
 
         Then(s"Worker should send $message \n")
         expectMsg(message)
