@@ -7,14 +7,11 @@ import akka.actor.{Actor, Props}
 
 import scala.annotation.tailrec
 
-//  todo create worker, with range that is recursively consumend unless there comes terminate or split message
 class DehashWorker(alphabet: String) extends Actor with Dehash {
 
 
   override def receive: Receive = {
     case Check(range, WorkDetails(hash, algo)) =>
-      // TODO:  println
-      //      println(s"I've got range:$range")
       val foundOption = range.map(x => getWord(x, alphabet, ""))
         .map(x => x -> hasher(x, algo)).find(x => x._2.equals(hash)).map(_._1)
       foundOption match {

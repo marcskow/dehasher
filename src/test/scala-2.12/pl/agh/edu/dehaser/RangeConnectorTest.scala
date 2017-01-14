@@ -18,7 +18,8 @@ class RangeConnectorTest extends FunSpecLike with GivenWhenThen with Matchers wi
         (BigInt(1) until 1001, (BigInt(1) until 1001) :: Nil),
         (BigInt(3001) until 10001, (BigInt(1) until 1001) :: (BigInt(3001) until 10001) :: Nil),
         (BigInt(1001) until 2001, (BigInt(1) until 2001) :: (BigInt(3001) until 10001) :: Nil),
-        (BigInt(2001) until 3001, (BigInt(1) until 10001) :: Nil)
+        (BigInt(2001) until 3001, (BigInt(1) until 10001) :: Nil) //,
+        //        (BigInt(2001) until 3001, (BigInt(1) until 10001) :: Nil)
       )
 
 
@@ -26,6 +27,7 @@ class RangeConnectorTest extends FunSpecLike with GivenWhenThen with Matchers wi
         When(s"Adding $range to existing connector")
         connector.addRange(range)
         Then(s"connceted ranges should be: $result")
+        assert(connector.ranges.length === result.length, "[length]ranges:" + connector.ranges)
         connector.ranges.zip(result).foreach { case (x, y) => assert(x.start === y.start, "[start]ranges:" + connector.ranges) }
         connector.ranges.zip(result).foreach { case (x, y) => assert(x.end === y.end, "ranges[end]:" + connector.ranges) }
 

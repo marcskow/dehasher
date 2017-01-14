@@ -11,10 +11,11 @@ case class DehashIt(hash: String, algo: String, originalSender: ActorRef)
 
 case class Check(range: NumericRange[BigInt], workDetails: WorkDetails)
 
-case class CheckHalf(range: BigRange, hash: String, algo: String)
+case class CheckHalf(range: BigRange, workDetails: WorkDetails)
 
 case class WorkDetails(hash: String, algo: String)
 
+case class DidMyWork(range: BigRange, workDetails: WorkDetails)
 case object GiveHalf
 
 case object Invalid

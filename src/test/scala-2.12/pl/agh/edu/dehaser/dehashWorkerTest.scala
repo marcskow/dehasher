@@ -18,10 +18,9 @@ class dehashWorkerTest extends TestKit(ActorSystem("NodeActorSpec")) with Implic
   describe("Worker test") {
 
 
-    it("Worker should send FoundIt message") {
+    it("Worker should send FoundIt or RangeChecked message") {
 
       val a_z = "abcdefghijklmnopqrstuvwxyz"
-      //      "MD5" "SHA-1" "SHA-256"
       val testRange = stringToNumber("test", a_z)
       val tezzRange = stringToNumber("tezz", a_z)
       val dupaRange = stringToNumber("dupa", a_z)
