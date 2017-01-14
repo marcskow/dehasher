@@ -5,7 +5,7 @@ trait Dehash {
   val defaultAlphabet: String =
     """ !\"#$%&\\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"""
 
-  val atomSize = 1000
+  val atomSize = 50000
   val splitThreshold: Int = 20 * atomSize
 
   def stringToNumber(word: String, alphabet: String): BigInt = {

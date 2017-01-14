@@ -20,7 +20,7 @@ class LocalCoordinator extends Actor with Dehash {
 
     // I'm the root. Message form queue
     //todo maybe some client Ref? to know shold I report
-    case DehashIt(hash, algo) =>
+    case DehashIt(hash, algo, originalSender) =>
 
     // I'm only partial worker
     //message from other local node [parent in tree]
@@ -35,11 +35,15 @@ class LocalCoordinator extends Actor with Dehash {
       // todo every ten ranges add send report upwards
       rangeConnector.addRange(range)
       if (iterator.hasNext) sender() ! Check(iterator.next(), workDetails)
+    // TODO: else send UpdateProgress(ranges) upwards
 
 
     case FoundIt(crackedPass) =>
     // forward directly to master coordinator
 
+
+    // TODO: what if someone takes range and message will be lost, or someone will disconnect form cluster before ending its range?
+    //todo maybe keep track who took range in map (range -> actor)and watch it's lifecycle[Akka]?
 
     case GiveHalf =>
       val optionalRanges = iterator.split()
@@ -48,6 +52,7 @@ class LocalCoordinator extends Actor with Dehash {
         iterator = BigRangeIterable(first).iterator
         sender() ! CheckHalf(second, workDetails.hash, workDetails.algo)
       }
+      else sender() ! Invalid
 
   }
 

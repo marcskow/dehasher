@@ -23,10 +23,12 @@ class RangeConnectorTest extends FunSpecLike with GivenWhenThen with Matchers wi
 
 
       forAll(ranges) { (range, result) =>
-        When(s"Adding $range to exixting connector")
+        When(s"Adding $range to existing connector")
         connector.addRange(range)
         Then(s"connceted ranges should be: $result")
-        assert(connector.ranges === result)
+        connector.ranges.zip(result).foreach { case (x, y) => assert(x.start === y.start, "[start]ranges:" + connector.ranges) }
+        connector.ranges.zip(result).foreach { case (x, y) => assert(x.end === y.end, "ranges[end]:" + connector.ranges) }
+
       }
     }
   }
