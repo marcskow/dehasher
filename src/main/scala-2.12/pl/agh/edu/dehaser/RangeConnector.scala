@@ -21,6 +21,7 @@ class RangeConnector {
     _ranges = _ranges.sortBy(_.start)
   }
 
+  // TODO: make immutable version 
   def ranges: List[BigRange] = _ranges.toList
 }
 

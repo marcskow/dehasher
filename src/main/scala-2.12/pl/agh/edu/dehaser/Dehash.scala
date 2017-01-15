@@ -7,6 +7,7 @@ trait Dehash {
 
   val atomSize = 50000
   val splitThreshold: Int = 20 * atomSize
+  val maxNrOfChars = 7
 
   def stringToNumber(word: String, alphabet: String): BigInt = {
     word.reverseIterator.map(char => alphabet.indexOf(char)).zipWithIndex.

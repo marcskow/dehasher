@@ -18,6 +18,7 @@ class DehashWorker(alphabet: String) extends Actor with Dehash {
         case Some(crackedPass) => sender ! FoundIt(crackedPass)
         case None => sender ! RangeChecked(range)
       }
+    case WorkAvailable => sender ! GiveMeRange
   }
 
   @tailrec

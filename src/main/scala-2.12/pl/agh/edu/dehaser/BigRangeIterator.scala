@@ -4,6 +4,7 @@ import scala.collection.immutable.{Iterable, NumericRange}
 
 case class BigRange(start: BigInt, end: BigInt)
 
+// TODO: make immutable 
 class BigRangeIterator(range: BigRange) extends Iterator[NumericRange[BigInt]] with Dehash {
   private var nextValue = range.start until (range.start + atomSize)
 
