@@ -33,7 +33,7 @@ case object GiveMeRange
 
 case object ImLeaving
 
-case object IendedMyRange
+case object IendedMyWork
 
 case object GiveMeWork
 
