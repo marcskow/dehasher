@@ -21,6 +21,7 @@ class CoordinatorFSMTest extends TestKit(ActorSystem("NodeActorSpec")) with Impl
   val xyRange = stringToNumber("xy", a_z)
 
   val masterProbe = TestProbe("master")
+  val aggregatorProbe = TestProbe("aggregator")
   val quueStub = TestProbe("queue")
 
   val xyaaRange = stringToNumber("xyaa", a_z)
@@ -31,6 +32,7 @@ class CoordinatorFSMTest extends TestKit(ActorSystem("NodeActorSpec")) with Impl
 
 
   describe("Coordinator") {
+    // TODO: test splitting task
 
     it("should send DidMyWork message") {
       val coordinator = system.actorOf(CoordinatorFSM.props(a_z, nrOfWorkers = 2, quueStub.ref.path), "coordinator1")
@@ -42,7 +44,7 @@ class CoordinatorFSMTest extends TestKit(ActorSystem("NodeActorSpec")) with Impl
       forAll(hashes) { (hash, dehashed, algo, range) =>
         Given(s"alphabet: $a_z  \n hash: $hash \n algo: $algo \n range: $range ")
         When("Check message is send")
-        coordinator ! CheckHalf(range, WorkDetails(hash, algo), masterProbe.ref)
+        coordinator ! CheckHalf(range, WorkDetails(hash, algo), masterProbe.ref, aggregatorProbe.ref)
 
         Then(s"DidMyWork message should sent \n")
         expectMsgType[DidMyWork]
@@ -64,7 +66,7 @@ class CoordinatorFSMTest extends TestKit(ActorSystem("NodeActorSpec")) with Impl
         Given(s"alphabet: $a_z  \n hash: $hash \n algo: $algo \n range: $range ")
 
         When("Check message is send")
-        coordinator ! CheckHalf(range, WorkDetails(hash, algo), masterProbe.ref)
+        coordinator ! CheckHalf(range, WorkDetails(hash, algo), masterProbe.ref, aggregatorProbe.ref)
 
         Then(s"FoundIt message should sent \n")
         masterProbe.expectMsg(300.seconds, FoundIt(dehashed))
@@ -78,10 +80,10 @@ class CoordinatorFSMTest extends TestKit(ActorSystem("NodeActorSpec")) with Impl
       val range = BigRange(dupaRange, aaaaaaaRange)
 
       When("CheckHalf message is sent")
-      queue.ignoreMsg { case GiveMeWork => true } // after initial state
-      coordinator ! CheckHalf(range, WorkDetails("kjnkbbuyvb", "SHA-1"), masterProbe.ref)
+      coordinator ! CheckHalf(range, WorkDetails("kjnkbbuyvb", "SHA-1"), masterProbe.ref, aggregatorProbe.ref)
 
       Then("queue should get OfferTask msg")
+      queue.ignoreMsg { case GiveMeWork => true } // after initial state
       queue.expectMsg(OfferTask)
     }
 

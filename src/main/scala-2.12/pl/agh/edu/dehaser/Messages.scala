@@ -7,13 +7,16 @@ import scala.collection.immutable.NumericRange
 
 sealed trait CheckResponse
 
-case class DehashIt(hash: String, algo: String, originalSender: ActorRef)
-
-case class AskHim(otherCoordinator: ActorRef)
 
 case class Check(range: NumericRange[BigInt], workDetails: WorkDetails)
 
-case class CheckHalf(range: BigRange, workDetails: WorkDetails, master: ActorRef)
+sealed trait ProcessingTask
+
+case class AskHim(otherCoordinator: ActorRef) extends ProcessingTask
+
+case class DehashIt(hash: String, algo: String, originalSender: ActorRef) extends ProcessingTask
+
+case class CheckHalf(range: BigRange, workDetails: WorkDetails, master: ActorRef, aggregator: ActorRef)
 
 case class WorkDetails(hash: String, algo: String)
 
@@ -39,6 +42,7 @@ case object GiveMeWork
 
 case object OfferTask
 
+case object EverythingChecked
 // TODO: send original hash and algo or not?
 case class FoundIt(crackedPass: String) extends CheckResponse
 
