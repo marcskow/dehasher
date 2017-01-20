@@ -1,6 +1,6 @@
 package pl.agh.edu.dehaser
 
-import akka.actor.FSM
+import akka.actor.{FSM, Props}
 
 
 class TaskQueue extends FSM[QueueState, QueueData] {
@@ -17,6 +17,10 @@ class TaskQueue extends FSM[QueueState, QueueData] {
   }
 
   initialize()
+}
+
+object TaskQueue {
+  def props: Props = Props(new TaskQueue())
 }
 
 

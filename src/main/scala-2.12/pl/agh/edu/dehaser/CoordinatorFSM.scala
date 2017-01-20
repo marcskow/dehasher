@@ -32,6 +32,7 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath, s
       goto(ChunkProcessing) using ProcessData(subContractors = Set.empty[ActorRef],
         RangeConnector(), details, range, BigRangeIterator(range),
         parent = sender(), master, aggregator)
+
   }
 
 
@@ -39,6 +40,12 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath, s
     case Event(FoundIt(crackedPass), ProcessData(subContractors, _, _, _, _, client, _, aggregator)) =>
       client ! Cracked(crackedPass)
       subContractors.foreach(_ ! CancelComputaion)
+      aggregator ! PoisonPill
+      goto(Idle) using Uninitialized
+
+
+    case Event(EverythingChecked, ProcessData(subContractors, _, _, _, _, client, _, aggregator)) =>
+      client ! NotFoundIt
       aggregator ! PoisonPill
       goto(Idle) using Uninitialized
 

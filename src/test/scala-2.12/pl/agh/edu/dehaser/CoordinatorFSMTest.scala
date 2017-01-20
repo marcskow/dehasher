@@ -101,5 +101,12 @@ class CoordinatorFSMTest extends TestKit(ActorSystem("NodeActorSpec")) with Impl
       queue.expectMsg(OfferTask)
     }
 
+    it("should send GiveMeWork after creation") {
+      val queue = TestProbe("queue")
+      val coordinator = system.actorOf(CoordinatorFSM.props(a_z, queuePath = queue.ref.path), "coordinator8")
+
+      queue.expectMsg(GiveMeWork)
+    }
+
   }
 }
