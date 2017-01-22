@@ -27,7 +27,7 @@ object Main {
     val system =
       ActorSystem("coordinatorSystem", ConfigFactory.load("coord"))
     val remotePath = ActorPath.fromString("akka.tcp://QueueSystem@127.0.0.1:2552/user/queue")
-    system.actorOf(CoordinatorFSM.props(alphabet = a_z, queuePath = remotePath))
+    system.actorOf(CoordinatorFSM.props(alphabet = a_z, queuePath = remotePath), "coordinator")
 
     println("Coordinator started")
 

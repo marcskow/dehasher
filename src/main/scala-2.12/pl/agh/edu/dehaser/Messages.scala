@@ -7,6 +7,10 @@ import scala.collection.immutable.NumericRange
 
 sealed trait CheckResponse
 
+// TODO: send original hash and algo or not?
+case class FoundIt(crackedPass: String) extends CheckResponse
+
+case class RangeChecked(range: NumericRange[BigInt]) extends CheckResponse
 
 case class Check(range: NumericRange[BigInt], workDetails: WorkDetails)
 
@@ -20,10 +24,10 @@ case class CheckHalf(range: BigRange, workDetails: WorkDetails, master: ActorRef
 
 case class WorkDetails(hash: String, algo: String)
 
-case class DidMyWork(range: BigRange, workDetails: WorkDetails)
 case object GiveHalf
 
 case object CancelComputaion
+
 case object Invalid
 
 case class Cracked(dehashed: String)
@@ -43,7 +47,5 @@ case object GiveMeWork
 case object OfferTask
 
 case object EverythingChecked
-// TODO: send original hash and algo or not?
-case class FoundIt(crackedPass: String) extends CheckResponse
 
-case class RangeChecked(range: NumericRange[BigInt]) extends CheckResponse
+case object IamYourNewChild

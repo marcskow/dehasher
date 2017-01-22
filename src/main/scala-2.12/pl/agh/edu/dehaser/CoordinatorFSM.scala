@@ -1,21 +1,21 @@
 package pl.agh.edu.dehaser
 
-import akka.actor.{ActorLogging, ActorPath, ActorRef, FSM, PoisonPill, Props}
+import akka.actor.{ActorLogging, ActorPath, ActorRef, LoggingFSM, PoisonPill, Props}
 
-class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath, slaveProps: (String => Props))
-  extends FSM[CoordinatorState, CoordinatorData] with Dehash with ActorLogging {
+import scala.concurrent.duration._
+
+class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
+  extends LoggingFSM[CoordinatorState, CoordinatorData] with Dehash with ActorLogging {
 
   private val queue = context.actorSelection(queuePath)
-  private val slaves = (1 to nrOfWorkers).map(_ => context.actorOf(slaveProps(alphabet))).toSet
+  private val slaves = (1 to nrOfWorkers).map(_ => context.actorOf(DehashWorker.props(alphabet))).toSet
 
 
   startWith(Idle, Uninitialized)
 
-  // todo maybe timeout on waiting for responses, and after timeout ask again
-  when(Idle) {
+  when(Idle, stateTimeout = 30 second) {
     case Event(DehashIt(hash, algo, originalSender), _) =>
       val wholeRange = BigRange(1, nrOfIterations(maxNrOfChars))
-
       val aggregator = context.actorOf(RangeAggregator.props(wholeRange, self))
       goto(Master) using ProcessData(subContractors = Set.empty[ActorRef],
         RangeConnector(), WorkDetails(hash, algo),
@@ -26,13 +26,12 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath, s
       otherCoordinator ! GiveHalf
       stay()
 
-    case Event(Invalid, _) => goto(Idle)
+    case Event(Invalid | StateTimeout, _) => goto(Idle)
 
     case Event(CheckHalf(range, details, master, aggregator), _) =>
       goto(ChunkProcessing) using ProcessData(subContractors = Set.empty[ActorRef],
         RangeConnector(), details, range, BigRangeIterator(range),
         parent = sender(), master, aggregator)
-
   }
 
 
@@ -40,25 +39,22 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath, s
     case Event(FoundIt(crackedPass), ProcessData(subContractors, _, _, _, _, client, _, aggregator)) =>
       client ! Cracked(crackedPass)
       subContractors.foreach(_ ! CancelComputaion)
-      aggregator ! PoisonPill
-      goto(Idle) using Uninitialized
+      endMaster(aggregator)
 
-
-    case Event(EverythingChecked, ProcessData(subContractors, _, _, _, _, client, _, aggregator)) =>
+    case Event(EverythingChecked, ProcessData(_, _, _, _, _, client, _, aggregator)) =>
       client ! NotFoundIt
-      aggregator ! PoisonPill
-      goto(Idle) using Uninitialized
+      endMaster(aggregator)
 
+    case Event(IamYourNewChild, data@ProcessData(subContractors, _, _, _, _, _, _, _)) =>
+      stay() using data.copy(subContractors = subContractors + sender())
 
-    case Event(rangeChecked@RangeChecked(range), p@ProcessData(_, rangeConnector, details, _, iterator, _, _, aggregator)) =>
-      val updatedRange = rangeConnector.addRange(range)
-      val (atom, iter) = iterator.next
-      atom.foreach(x => sender() ! Check(x, details))
-      aggregator ! rangeChecked
-      goto(stateName) using p.copy(iterator = iter, rangeConnector = updatedRange)
+    case Event(rangeChecked@RangeChecked(range), data: ProcessData) =>
+      val updatedRange = data.rangeConnector.addRange(range)
+      data.aggregator ! rangeChecked
+      checkedRange(rangeChecked, data, updatedRange)
     // todo go to some waiting state and wait for others to complete (when range connector will be full) after everything
     // TODO: master check every 60 second, if some ranges were't lost, and retransmits them into queue if needed
-  } // todo how to end master when pass not found?
+  }
 
 
   when(ChunkProcessing) {
@@ -66,35 +62,21 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath, s
       master ! foundIt
       Leave(subContractors)
 
-    case Event(ImLeaving, p@ProcessData(_, _, _, _, _, _, master, _)) =>
-      stay() using p.copy(parent = master)
+    case Event(ImLeaving, data@ProcessData(_, _, _, _, _, _, master, _)) =>
+      master ! IamYourNewChild
+      stay() using data.copy(parent = master)
 
-
-    case Event(checked@RangeChecked(range), p@ProcessData(subContractors, rangeConnector, details, rangeToCheck, iterator, parent, _, aggregator)) =>
+    case Event(checked@RangeChecked(range), data@ProcessData(subContractors, rangeConnector, _,
+    rangeToCheck, _, _, _, aggregator)) =>
       val updatedRange = rangeConnector.addRange(range)
       aggregator ! checked
       if (updatedRange.contains(rangeToCheck)) {
-
-        parent ! DidMyWork(rangeToCheck, details) // todo right now nobody cares about it
-        Leave(subContractors) // todo go to some waiting sate and wait for slaves to complete (when range conncetor will be full)
-      } else {
-        val (atom, iter) = iterator.next
-        atom.foreach(x => sender() ! Check(x, details))
-        goto(stateName) using p.copy(iterator = iter, rangeConnector = updatedRange)
-      }
-
-    //      val (atom, maybeIterator) = iterator.next
-    //      sender() ! Check(atom, details)
-    //      maybeIterator match {
-    //        case Some(x) => goto(ChunkProcessing) using p.copy(iterator = x)
-    //        case None =>
-    //      }
-
+        // todo go to some waiting sate and wait for slaves to complete
+        // todo [right now there are few unhandled messages from slaves]
+        Leave(subContractors)
+      } else checkedRange(checked, data, updatedRange)
   }
 
-  def nrOfIterations(maxStringSize: Int): BigInt = {
-    (1 to maxStringSize).map(x => BigInt(math.pow(alphabet.length, x).toLong)).sum
-  }
 
   onTransition {
     case _ -> Idle => queue ! GiveMeWork
@@ -102,7 +84,7 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath, s
       slaves.foreach(_ ! WorkAvailable)
       queue ! OfferTask
 
-    case _ -> (Master | ChunkProcessing) => nextStateData match {
+    case (Master -> Master | ChunkProcessing -> ChunkProcessing) => nextStateData match {
       case ProcessData(_, _, _, range, _, _, _, _) =>
         if ((range.end - range.start) > splitThreshold) {
           queue ! OfferTask
@@ -130,23 +112,14 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath, s
       goto(Idle) using Uninitialized
 
 
-    case Event(GiveMeRange, p@ProcessData(_, _, details, _, iterator, _, _, _)) =>
-      //      val (atom, maybeIterator) = iterator.next
-      //      sender() ! Check(atom, details)
-      //      maybeIterator match {
-      //        case Some(x) => goto(stateName) using p.copy(iterator = x)
-      //        case None =>
-      //          log.warning("Sth possibly wrong. Empty range on Start")
-      //          goto(Idle) using Uninitialized // todo wait for checking all ranges
-      //      }
+    case Event(GiveMeRange, data@ProcessData(_, _, details, _, iterator, _, _, _)) =>
       val (atom, iter) = iterator.next
       atom.foreach(x => sender() ! Check(x, details))
-      goto(stateName) using p.copy(iterator = iter)
+      goto(stateName) using data.copy(iterator = iter)
 
     case msg => log.error(s"unhandled msg:$msg")
       stay()
   }
-
 
   initialize()
 
@@ -155,12 +128,24 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath, s
     goto(Idle) using Uninitialized
   }
 
+  private def checkedRange(rangeChecked: RangeChecked, data: ProcessData, updatedRange: RangeConnector) = {
+    val (atom, iter) = data.iterator.next
+    atom.foreach(x => sender() ! Check(x, data.workDetails))
+    stay() using data.copy(iterator = iter, rangeConnector = updatedRange)
+  }
 
+  private def endMaster(aggregator: ActorRef) = {
+    aggregator ! PoisonPill
+    goto(Idle) using Uninitialized
+  }
+
+
+  private def nrOfIterations(maxStringSize: Int): BigInt = {
+    (1 to maxStringSize).map(x => BigInt(math.pow(alphabet.length, x).toLong)).sum
+  }
 }
 
 object CoordinatorFSM {
-  // TODO: maybe remove slave creator ?
-  def props(alphabet: String, nrOfWorkers: Int = 4, queuePath: ActorPath,
-            slaveProps: (String => Props) = alphabet => DehashWorker.props(alphabet)): Props =
-    Props(new CoordinatorFSM(alphabet, nrOfWorkers, queuePath, slaveProps))
+  def props(alphabet: String, nrOfWorkers: Int = 4, queuePath: ActorPath): Props =
+    Props(new CoordinatorFSM(alphabet, nrOfWorkers, queuePath))
 }

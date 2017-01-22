@@ -1,7 +1,7 @@
 package pl.agh.edu.dehaser
 
 import akka.actor.ActorSystem
-import akka.testkit.{ImplicitSender, TestKit, TestProbe}
+import akka.testkit.{ImplicitSender, TestFSMRef, TestKit, TestProbe}
 import org.scalatest._
 import org.scalatest.prop.TableDrivenPropertyChecks
 
@@ -22,7 +22,7 @@ class CoordinatorFSMTest extends TestKit(ActorSystem("NodeActorSpec")) with Impl
 
   val masterProbe = TestProbe("master")
   val aggregatorProbe = TestProbe("aggregator")
-  val quueStub = TestProbe("queue")
+  val queueStub = TestProbe("queue")
 
   val xyaaRange = stringToNumber("xyaa", a_z)
 
@@ -34,8 +34,8 @@ class CoordinatorFSMTest extends TestKit(ActorSystem("NodeActorSpec")) with Impl
   describe("Coordinator") {
     // TODO: test splitting task
 
-    it("should send DidMyWork message") {
-      val coordinator = system.actorOf(CoordinatorFSM.props(a_z, nrOfWorkers = 2, quueStub.ref.path), "coordinator1")
+    it("should  go Idle after cheking range") {
+      val coordinator = TestFSMRef(new CoordinatorFSM(a_z, nrOfWorkers = 4, queueStub.ref.path))
       val hashes =
         Table(
           ("hash", "dehashed", "algo", "range"), // First tuple defines column names
@@ -46,13 +46,13 @@ class CoordinatorFSMTest extends TestKit(ActorSystem("NodeActorSpec")) with Impl
         When("Check message is send")
         coordinator ! CheckHalf(range, WorkDetails(hash, algo), masterProbe.ref, aggregatorProbe.ref)
 
-        Then(s"DidMyWork message should sent \n")
-        expectMsgType[DidMyWork]
+        Then(s"should go Idle  \n")
+        awaitCond(coordinator.stateName === Idle)
       }
     }
 
     it("should find solution") {
-      val coordinator = system.actorOf(CoordinatorFSM.props(a_z, queuePath = quueStub.ref.path), "coordinator4")
+      val coordinator = system.actorOf(CoordinatorFSM.props(a_z, queuePath = queueStub.ref.path), "coordinator4")
       val hashes =
         Table(
           ("hash", "dehashed", "algo", "range"), // First tuple defines column names
@@ -83,8 +83,7 @@ class CoordinatorFSMTest extends TestKit(ActorSystem("NodeActorSpec")) with Impl
       coordinator ! CheckHalf(range, WorkDetails("kjnkbbuyvb", "SHA-1"), masterProbe.ref, aggregatorProbe.ref)
 
       Then("queue should get OfferTask msg")
-      queue.ignoreMsg { case GiveMeWork => true } // after initial state
-      queue.expectMsg(OfferTask)
+      queue.fishForMessage(1 second) { case OfferTask => true; case _ => false }
     }
 
     it("should offerTask to queue after obtaining large range[DehashIt] ") {
@@ -94,11 +93,10 @@ class CoordinatorFSMTest extends TestKit(ActorSystem("NodeActorSpec")) with Impl
       val range = BigRange(dupaRange, aaaaaaaRange)
 
       When("DehashIt message is sent")
-      queue.ignoreMsg { case GiveMeWork => true } // after initial state
       coordinator ! DehashIt("kjnkbbuyvb", "SHA-1", TestProbe().ref)
 
       Then("queue should get OfferTask msg")
-      queue.expectMsg(OfferTask)
+      queue.fishForMessage(1 second) { case OfferTask => true; case _ => false }
     }
 
     it("should send GiveMeWork after creation") {
