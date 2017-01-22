@@ -30,6 +30,6 @@ object Main {
     system.actorOf(CoordinatorFSM.props(alphabet = a_z, queuePath = remotePath), "coordinator")
 
     println("Coordinator started")
-
+    // TODO: change java serializer to sth else
   }
 }

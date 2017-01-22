@@ -4,7 +4,6 @@ import scala.collection.immutable.NumericRange
 
 case class BigRange(start: BigInt, end: BigInt)
 
-// TODO: make immutable 
 class BigRangeIterator(range: BigRange) extends Dehash {
   //  require(range.end >= range.start, s"range: $range")
 

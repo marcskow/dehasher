@@ -1,9 +1,9 @@
 package pl.agh.edu.dehaser
 
-import akka.actor.{FSM, Props}
+import akka.actor.{LoggingFSM, Props}
 
 
-class TaskQueue extends FSM[QueueState, QueueData] {
+class TaskQueue extends LoggingFSM[QueueState, QueueData] {
 
   startWith(QueueStateImpl, QueueData(List()))
 

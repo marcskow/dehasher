@@ -16,14 +16,10 @@ class DehashWorker(alphabet: String) extends Actor with Dehash {
         .map(x => x -> hasher(x, algo)).find(x => x._2.equals(hash)).map(_._1)
       foundOption match {
         case Some(crackedPass) =>
-          // TODO: println
-          println(s"I've fount it: $crackedPass")
           sender ! FoundIt(crackedPass)
         case None => sender ! RangeChecked(range)
       }
     case WorkAvailable =>
-      // TODO: println
-      println("I've got work")
       sender ! GiveMeRange
   }
 

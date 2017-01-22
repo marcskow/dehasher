@@ -1,11 +1,11 @@
 package pl.agh.edu.dehaser
 
-import akka.actor.{ActorLogging, ActorPath, ActorRef, LoggingFSM, PoisonPill, Props}
+import akka.actor.{ActorLogging, ActorPath, ActorRef, FSM, PoisonPill, Props}
 
 import scala.concurrent.duration._
 
 class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
-  extends LoggingFSM[CoordinatorState, CoordinatorData] with Dehash with ActorLogging {
+  extends FSM[CoordinatorState, CoordinatorData] with Dehash with ActorLogging {
 
   private val queue = context.actorSelection(queuePath)
   private val slaves = (1 to nrOfWorkers).map(_ => context.actorOf(DehashWorker.props(alphabet))).toSet
@@ -16,7 +16,7 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
   when(Idle, stateTimeout = 30 second) {
     case Event(DehashIt(hash, algo, originalSender), _) =>
       val wholeRange = BigRange(1, nrOfIterations(maxNrOfChars))
-      val aggregator = context.actorOf(RangeAggregator.props(wholeRange, self))
+      val aggregator = context.actorOf(RangeAggregator.props(wholeRange, self), "aggregator")
       goto(Master) using ProcessData(subContractors = Set.empty[ActorRef],
         RangeConnector(), WorkDetails(hash, algo),
         wholeRange, BigRangeIterator(wholeRange),
@@ -38,7 +38,7 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
   when(Master) {
     case Event(FoundIt(crackedPass), ProcessData(subContractors, _, _, _, _, client, _, aggregator)) =>
       client ! Cracked(crackedPass)
-      subContractors.foreach(_ ! CancelComputaion)
+      subContractors.foreach(_ ! CancelComputation)
       endMaster(aggregator)
 
     case Event(EverythingChecked, ProcessData(_, _, _, _, _, client, _, aggregator)) =>
@@ -107,15 +107,15 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
         stay()
       }
 
-    case Event(CancelComputaion, ProcessData(subContractors, _, _, _, _, _, _, _)) =>
-      subContractors.foreach(_ ! CancelComputaion)
+    case Event(CancelComputation, ProcessData(subContractors, _, _, _, _, _, _, _)) =>
+      subContractors.foreach(_ ! CancelComputation)
       goto(Idle) using Uninitialized
 
 
     case Event(GiveMeRange, data@ProcessData(_, _, details, _, iterator, _, _, _)) =>
       val (atom, iter) = iterator.next
       atom.foreach(x => sender() ! Check(x, details))
-      goto(stateName) using data.copy(iterator = iter)
+      stay() using data.copy(iterator = iter)
 
     case msg => log.error(s"unhandled msg:$msg")
       stay()

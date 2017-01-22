@@ -26,7 +26,7 @@ case class WorkDetails(hash: String, algo: String)
 
 case object GiveHalf
 
-case object CancelComputaion
+case object CancelComputation
 
 case object Invalid
 
@@ -39,8 +39,6 @@ case object WorkAvailable
 case object GiveMeRange
 
 case object ImLeaving
-
-case object IendedMyWork
 
 case object GiveMeWork
 

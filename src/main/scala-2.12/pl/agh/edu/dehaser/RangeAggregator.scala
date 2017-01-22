@@ -7,11 +7,12 @@ class RangeAggregator(wholeRange: BigRange, master: ActorRef) extends FSM[Aggreg
   startWith(AggregatorStateImpl, RangeConnector())
 
   when(AggregatorStateImpl) {
-    case Event(RangeChecked(range), rangeConnector) =>
-      val updatedRange = rangeConnector.addRange(range)
+    case Event(RangeChecked(range), checkedRange) =>
+      val updatedRange = checkedRange.addRange(range)
       if (updatedRange.contains(wholeRange)) {
         master ! EverythingChecked
       }
+      log.info(s"checked: ${checkedRange.ranges} out of: $wholeRange ")
       goto(AggregatorStateImpl) using updatedRange
 
   }
@@ -23,7 +24,6 @@ object RangeAggregator {
   def props(wholeRange: BigRange, master: ActorRef): Props = Props(new RangeAggregator(wholeRange, master))
 }
 
-case class AggregatorData(connector: RangeConnector)
 
 sealed trait AggregatorState
 
