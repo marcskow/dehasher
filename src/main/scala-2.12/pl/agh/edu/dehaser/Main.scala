@@ -21,9 +21,9 @@ object Main {
       ConfigFactory.load("queue"))
     val queue = system.actorOf(TaskQueue.props, "queue")
     val reporter = system.actorOf(Props[Reporter], "reporter")
-    //    queue ! DehashIt("a48dbf15d3c2e171b9328005d5727589903c0083b524efba66ea1516231bca85", "SHA-256", reporter) // dupa1
-    //    queue ! DehashIt("ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad", "SHA-256", reporter) // abc
-    //    queue ! DehashIt("90b94d224ee82c837143ea6f0308c596f0142612678a036c65041b246d52df22", "SHA-256", reporter) // dupsko
+    //    queue ! DehashIt("4bc75035d73f6083683e040fc31f28e0ec6d1cbce5cb0a5e2611eb89bceb6c16", "SHA-256", reporter) // testhash
+    //    queue ! DehashIt("c3904668eebedc5a443f65243d196157d31d19ad4b0b86eb3957449a652aa284", "SHA-256", reporter) // hardcoded
+    //    queue ! DehashIt("cf80cd8aed482d5d1527d7dc72fceff84e6326592848447d2dc0b0e87dfc9a90", "SHA-256", reporter) // testing
     println("Started queueSystem - waiting for messages")
   }
 
