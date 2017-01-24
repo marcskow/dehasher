@@ -13,12 +13,14 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
 
   startWith(Idle, Uninitialized)
 
-  when(Idle, stateTimeout = 30 second) {
+  when(Idle, stateTimeout = 30 seconds) {
     case Event(DehashIt(hash, algo, originalSender), _) =>
+      log.info(s"I'm now master coordinator of: hash: $hash algo: $algo")
       val wholeRange = BigRange(1, nrOfIterations(maxNrOfChars))
-      val aggregator = context.actorOf(RangeAggregator.props(wholeRange, self), "aggregator")
+      val details = WorkDetails(hash, algo)
+      val aggregator = context.actorOf(RangeAggregator.props(wholeRange, self, details), "aggregator")
       goto(Master) using ProcessData(subContractors = Set.empty[ActorRef],
-        RangeConnector(), WorkDetails(hash, algo),
+        RangeConnector(), details,
         wholeRange, BigRangeIterator(wholeRange),
         parent = originalSender, masterCoordinator = self, aggregator)
 
@@ -29,9 +31,13 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
     case Event(Invalid | StateTimeout, _) => goto(Idle)
 
     case Event(CheckHalf(range, details, master, aggregator), _) =>
+      log.info(s"Started processing chunk: $range, : details: $details")
       goto(ChunkProcessing) using ProcessData(subContractors = Set.empty[ActorRef],
         RangeConnector(), details, range, BigRangeIterator(range),
         parent = sender(), master, aggregator)
+
+    case Event(GiveHalf, _) => sender() ! Invalid
+      stay()
   }
 
 
@@ -48,7 +54,7 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
     case Event(IamYourNewChild, data@ProcessData(subContractors, _, _, _, _, _, _, _)) =>
       stay() using data.copy(subContractors = subContractors + sender())
 
-    case Event(rangeChecked@RangeChecked(range), data: ProcessData) =>
+    case Event(rangeChecked@RangeChecked(range, details), data: ProcessData) if details == data.workDetails =>
       val updatedRange = data.rangeConnector.addRange(range)
       data.aggregator ! rangeChecked
       checkedRange(rangeChecked, data, updatedRange)
@@ -66,8 +72,8 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
       master ! IamYourNewChild
       stay() using data.copy(parent = master)
 
-    case Event(checked@RangeChecked(range), data@ProcessData(subContractors, rangeConnector, _,
-    rangeToCheck, _, _, _, aggregator)) =>
+    case Event(checked@RangeChecked(range, details), data@ProcessData(subContractors, rangeConnector, _,
+    rangeToCheck, _, _, _, aggregator)) if details == data.workDetails =>
       val updatedRange = rangeConnector.addRange(range)
       aggregator ! checked
       if (updatedRange.contains(rangeToCheck)) {
@@ -116,6 +122,10 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
       val (atom, iter) = iterator.next
       atom.foreach(x => sender() ! Check(x, details))
       stay() using data.copy(iterator = iter)
+
+    case Event(rangeChecked@RangeChecked(range, details), _) =>
+      log.debug(s"I got range: $receive about $details, but it is not processed anymore, so I ignore this message")
+      stay()
 
     case msg => log.error(s"unhandled msg:$msg")
       stay()

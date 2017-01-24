@@ -5,9 +5,9 @@ trait Dehash {
   val defaultAlphabet: String =
     """ !\"#$%&\\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"""
 
-  val atomSize = 500000
+  val atomSize = 50000
   val splitThreshold: Int = 20 * atomSize
-  val maxNrOfChars = 7
+  val maxNrOfChars = 5
 
   def stringToNumber(word: String, alphabet: String): BigInt = {
     word.reverseIterator.map(char => alphabet.indexOf(char)).zipWithIndex.

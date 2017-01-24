@@ -17,7 +17,9 @@ object Main {
       ConfigFactory.load("queue"))
     val queue = system.actorOf(TaskQueue.props, "queue")
     val reporter = system.actorOf(Props[Reporter], "reporter")
-    queue ! DehashIt("90b94d224ee82c837143ea6f0308c596f0142612678a036c65041b246d52df22", "SHA-256", reporter)
+    queue ! DehashIt("a48dbf15d3c2e171b9328005d5727589903c0083b524efba66ea1516231bca85", "SHA-256", reporter) // dupa1
+    queue ! DehashIt("ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad", "SHA-256", reporter) // abc
+    queue ! DehashIt("90b94d224ee82c837143ea6f0308c596f0142612678a036c65041b246d52df22", "SHA-256", reporter) // dupsko
     println("Started queueSystem - waiting for messages")
   }
 
@@ -29,7 +31,6 @@ object Main {
     val remotePath = ActorPath.fromString("akka.tcp://QueueSystem@127.0.0.1:2552/user/queue")
     system.actorOf(CoordinatorFSM.props(alphabet = a_z, queuePath = remotePath), "coordinator")
 
-    println("Coordinator started")
     // TODO: change java serializer to sth else
   }
 }

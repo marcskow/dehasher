@@ -11,13 +11,13 @@ class DehashWorker(alphabet: String) extends Actor with Dehash {
 
 
   override def receive: Receive = {
-    case Check(range, WorkDetails(hash, algo)) =>
+    case Check(range, details@WorkDetails(hash, algo)) =>
       val foundOption = range.map(x => getWord(x, alphabet, ""))
         .map(x => x -> hasher(x, algo)).find(x => x._2.equals(hash)).map(_._1)
       foundOption match {
         case Some(crackedPass) =>
           sender ! FoundIt(crackedPass)
-        case None => sender ! RangeChecked(range)
+        case None => sender ! RangeChecked(range, details)
       }
     case WorkAvailable =>
       sender ! GiveMeRange

@@ -10,7 +10,7 @@ sealed trait CheckResponse
 // TODO: send original hash and algo or not?
 case class FoundIt(crackedPass: String) extends CheckResponse
 
-case class RangeChecked(range: NumericRange[BigInt]) extends CheckResponse
+case class RangeChecked(range: NumericRange[BigInt], workDetails: WorkDetails) extends CheckResponse
 
 case class Check(range: NumericRange[BigInt], workDetails: WorkDetails)
 
