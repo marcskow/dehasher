@@ -2,9 +2,22 @@ package pl.agh.edu.dehaser
 
 
 import akka.actor.{ActorPath, ActorSystem, Props}
+import akka.stream.ActorMaterializer
 import com.typesafe.config.ConfigFactory
 
+import scala.concurrent.ExecutionContext
+
 object Main {
+
+
+  def startRestSystem() ={
+    val system = ActorSystem()
+    protected val ctx : ExecutionContext = system.dispatcher
+    implicit val materializer: ActorMaterializer = ActorMaterializer()
+
+  }
+
+
   def main(args: Array[String]): Unit = {
     if (args.headOption.contains("Queue"))
       startQueueSystem()
