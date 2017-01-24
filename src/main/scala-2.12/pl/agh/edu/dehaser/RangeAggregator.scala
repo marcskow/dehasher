@@ -16,7 +16,7 @@ class RangeAggregator(wholeRange: BigRange, master: ActorRef, workDetails: WorkD
       log.info(s"checked: ${updatedRange.ranges} out of: $wholeRange ")
       goto(AggregatorStateImpl) using updatedRange
 
-    case _ => log.error("\n\n\n\n\nUnexpected Message\n\n\n\n\n\n\n")
+    case _ => log.error("\n\n\n\n\nNobody expects Spanish Inquisition\n\n\n\n\n\n\n")
       stop()
   }
 
