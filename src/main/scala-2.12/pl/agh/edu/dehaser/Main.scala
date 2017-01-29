@@ -6,7 +6,7 @@ import com.typesafe.config.ConfigFactory
 
 object Main {
 
-  val remotePath: ActorPath = ActorPath.fromString("akka.tcp://QueueSystem@192.168.0.11:2552/user/queue")
+  val remotePath: ActorPath = ActorPath.fromString("akka.tcp://QueueSystem@192.168.43.41:2552/user/queue")
 
   def main(args: Array[String]): Unit = {
     args.headOption match {
@@ -44,15 +44,16 @@ object Main {
       ConfigFactory.load("client"))
     val reporter = system.actorOf(Props[Reporter], "reporter")
 
-    val queue = system.actorSelection(remotePath)
-    System.out.println("Please write your hash: \n")
-    val hash = scala.io.StdIn.readLine()
-    System.out.println("Please write algorithm [SHA-256 | MD5 |SHA-1]: \n")
-    val algo = scala.io.StdIn.readLine()
+    while(true) {
+      val queue = system.actorSelection(remotePath)
+      System.out.println("Please write your hash: \n")
+      val hash = scala.io.StdIn.readLine()
+      System.out.println("Please write algorithm [SHA-256 | MD5 |SHA-1]: \n")
+      val algo = scala.io.StdIn.readLine()
 
-    queue ! DehashIt(hash, algo, reporter)
-    System.out.println("elo \n")
-
+      queue ! DehashIt(hash, algo, reporter)
+      System.out.println("Task dispatched \n")
+    }
 
   }
 }
