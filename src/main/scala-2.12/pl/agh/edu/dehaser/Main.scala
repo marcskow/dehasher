@@ -6,7 +6,7 @@ import com.typesafe.config.ConfigFactory
 
 object Main {
 
-  val remotePath: ActorPath = ActorPath.fromString("akka.tcp://QueueSystem@192.168.43.41:2552/user/queue")
+  val remotePath: ActorPath = ActorPath.fromString("akka.tcp://QueueSystem@127.0.0.1:2552/user/queue")
 
   def main(args: Array[String]): Unit = {
     args.headOption match {
