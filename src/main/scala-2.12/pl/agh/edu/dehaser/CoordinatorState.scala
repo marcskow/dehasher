@@ -16,8 +16,6 @@ sealed trait CoordinatorData
 case object Uninitialized extends CoordinatorData
 
 
-case class ProcessData(subContractors: Set[ActorRef],
-                       rangeConnector: RangeConnector, workDetails: WorkDetails,
-                       rangeToCheck: BigRange, iterator: BigRangeIterator,
+case class ProcessData(subContractors: Set[ActorRef], workDetails: WorkDetails, iterator: BigRangeIterator,
                        parent: ActorRef, masterCoordinator: ActorRef, aggregator: ActorRef) extends CoordinatorData
 

@@ -3,6 +3,7 @@ package pl.agh.edu.dehaser
 import akka.actor.{ActorLogging, ActorPath, ActorRef, FSM, PoisonPill, Props}
 
 import scala.concurrent.duration._
+import scala.language.postfixOps
 
 class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
   extends FSM[CoordinatorState, CoordinatorData] with Dehash with ActorLogging {
@@ -40,7 +41,10 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
       stay()
   }
 
-
+  // TODO: range aggregator contains personal and whole range
+  // TODO: subcontracotrs id map actorRef => personal range
+  // TODO: parent is watching child for failure
+  // TODO: childer watching parent for failure, and go to master
   when(Master) {
     case Event(FoundIt(crackedPass), ProcessData(subContractors, _, _, _, _, client, _, aggregator)) =>
       client ! Cracked(crackedPass)
@@ -76,11 +80,8 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
     rangeToCheck, _, _, _, aggregator)) if details == data.workDetails =>
       val updatedRange = rangeConnector.addRange(range)
       aggregator ! checked
-      if (updatedRange.contains(rangeToCheck)) {
-        // todo go to some waiting sate and wait for slaves to complete
-        // todo [right now there are few unhandled messages from slaves]
-        Leave(subContractors)
-      } else checkedRange(checked, data, updatedRange)
+      if (updatedRange.contains(rangeToCheck)) Leave(subContractors)
+      else checkedRange(checked, data, updatedRange)
   }
 
 
@@ -93,8 +94,11 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
     case (Master -> Master | ChunkProcessing -> ChunkProcessing) => nextStateData match {
       case ProcessData(_, _, _, range, _, _, _, _) =>
         if ((range.end - range.start) > splitThreshold) {
+          //todo update for lists
           queue ! OfferTask
         }
+      case Uninitialized => log.error("\n\n\n\n\nYou didn't expect me here\n\n\n\n\n\n\n")
+        stop()
     }
   }
 
@@ -123,8 +127,8 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
       atom.foreach(x => sender() ! Check(x, details))
       stay() using data.copy(iterator = iter)
 
-    case Event(rangeChecked@RangeChecked(range, details), _) =>
-      log.debug(s"I got range: $receive about $details, but it is not processed anymore, so I ignore this message")
+    case Event(RangeChecked(range, details), _) =>
+      log.debug(s"I got range: $range about $details, but it is not processed anymore, so I ignore this message")
       stay()
 
     case msg => log.error(s"unhandled msg:$msg")

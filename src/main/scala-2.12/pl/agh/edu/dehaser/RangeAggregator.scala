@@ -2,19 +2,23 @@ package pl.agh.edu.dehaser
 
 import akka.actor.{ActorLogging, ActorRef, FSM, Props}
 
-class RangeAggregator(wholeRange: BigRange, master: ActorRef, workDetails: WorkDetails) extends
-  FSM[AggregatorState, RangeConnector] with ActorLogging {
+import scala.concurrent.duration._
+import scala.language.postfixOps
 
-  startWith(AggregatorStateImpl, RangeConnector())
+class RangeAggregator(wholeRange: List[BigRange], coordinator: ActorRef, workDetails: WorkDetails) extends
+  FSM[AggregatorState, AggregatorData] with ActorLogging {
 
-  when(AggregatorStateImpl) {
-    case Event(RangeChecked(range, details), checkedRange) if details == workDetails =>
-      val updatedRange = checkedRange.addRange(range)
-      if (updatedRange.contains(wholeRange)) {
-        master ! EverythingChecked
+  startWith(AggregatorStateImpl, AggregatorData(RangeConnector(), RangeConnector(), personalRange = wholeRange))
+
+  when(AggregatorStateImpl, stateTimeout = 30 seconds) {
+    case Event(RangeChecked(range, details), AggregatorData(whole, personal, personalRange)) if details == workDetails =>
+      val updatedWhole = whole.addRange(range)
+      val updatedPersonal = personal.addRange(range)
+      if (updatedPersonal.contains(personalRange)) {
+        coordinator ! EverythingChecked
       }
-      log.info(s"checked: ${updatedRange.ranges} out of: $wholeRange ")
-      goto(AggregatorStateImpl) using updatedRange
+      log.info(s"checked: ${personal.ranges} out of: $personalRange [personal] ")
+      goto(AggregatorStateImpl) using AggregatorData(updatedWhole, updatedPersonal, personalRange)
 
     case _ => log.error("\n\n\n\n\nNobody expects Spanish Inquisition\n\n\n\n\n\n\n")
       stop()
@@ -24,7 +28,7 @@ class RangeAggregator(wholeRange: BigRange, master: ActorRef, workDetails: WorkD
 }
 
 object RangeAggregator {
-  def props(wholeRange: BigRange, master: ActorRef, workDetails: WorkDetails): Props =
+  def props(wholeRange: List[BigRange], master: ActorRef, workDetails: WorkDetails): Props =
     Props(new RangeAggregator(wholeRange, master, workDetails))
 }
 
@@ -32,3 +36,6 @@ object RangeAggregator {
 sealed trait AggregatorState
 
 case object AggregatorStateImpl extends AggregatorState
+
+case class AggregatorData(wholeRangeConnector: RangeConnector,
+                          personalRangeConnector: RangeConnector, personalRange: List[BigRange])
