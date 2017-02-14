@@ -2,7 +2,9 @@ package pl.agh.edu.dehaser
 
 import scala.collection.immutable.NumericRange
 
-case class BigRange(start: BigInt, end: BigInt)
+case class BigRange(start: BigInt, end: BigInt) {
+  def contains(otherRange: BigRange): Boolean = otherRange.start >= start && otherRange.end <= end
+}
 
 class BigRangeIterator(range: BigRange) extends Dehash {
   //  require(range.end >= range.start, s"range: $range")
@@ -16,6 +18,7 @@ class BigRangeIterator(range: BigRange) extends Dehash {
     val nextIt = BigRangeIterator(BigRange(range.start + atomSize, range.end))
     (nextValue, nextIt)
   }
+
 
   def split(): Option[(BigRange, BigRange)] = {
     val length = range.end - range.start + 1
