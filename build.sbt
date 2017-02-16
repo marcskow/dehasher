@@ -6,7 +6,7 @@ scalaVersion := "2.12.1"
 val akkaVersion = "2.4.16"
 val akkaHttp = "10.0.0"
 val json4s = "3.5.0"
-resolvers += "dka-oss-maven" at "https://dl.bintray.com/dka/oss"
+resolvers += Resolver.bintrayRepo("hseeberger", "maven")
 
 
 libraryDependencies ++= Seq(
@@ -25,10 +25,7 @@ libraryDependencies ++= Seq(
   "org.json4s" %% "json4s-jackson" % json4s,
   "org.json4s" %% "json4s-ext" % json4s,
 
-  "de.heikoseeberger" %% "akka-http-json4s" % "1.6.0" exclude("org.json4s", "json4s-core_2.11")
+  "de.heikoseeberger" %% "akka-http-json4s" % "1.12.0" exclude("org.json4s", "json4s-core_2.11")
 )
-
-
-
 
 mainClass in(Compile, run) := Some("pl.agh.edu.dehaser.MainSample")

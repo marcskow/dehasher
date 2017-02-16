@@ -8,7 +8,6 @@ class TaskRepository {
     List(Task("1219", "e1938h129che"),Task("1219", "e1938h129che"))
   }
 
-
   def getTask(id:String) = {
     Task("1219", "e1938h129che")
   }

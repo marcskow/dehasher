@@ -1,8 +1,8 @@
 package pl.agh.edu.dehaser.modules
 
-
+import akka.http.scaladsl.marshalling.ToResponseMarshallable
+import akka.http.scaladsl.unmarshalling.{Unmarshaller, Unmarshal}
 import pl.agh.edu.dehaser.RestController
-
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 import akka.http.scaladsl.model.StatusCodes._
@@ -18,8 +18,7 @@ class TaskRoutes(taskService: TaskService) extends RestController{
   override def endpoints: Route = {
     path(uri) {
       get{
-//        completeRequest(taskService.tasks())
-        complete(OK -> taskService.tasks)
+        complete(taskService.tasks())
       }
     } ~ path(uri/regex){ id =>
       get{
