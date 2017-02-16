@@ -1,12 +1,15 @@
 package pl.agh.edu.dehaser
 
+import scala.language.implicitConversions
+
 
 case class RangeConnector(ranges: List[BigRange] = List()) {
-  def addRanges(rangeConnector: RangeConnector) = {
+
+
+  def merge(rangeConnector: RangeConnector): RangeConnector = {
     rangeConnector.ranges.foldLeft(this) { case (conn, curr) => conn.addRange(curr) }
   }
 
-  // TODO: implicit conversion NumericRange[BigRange] -> NumericRange 
   def addRange(range: BigRange): RangeConnector = {
     val bigRange = BigRange(range.start, range.end)
     val after = ranges.find { it => it.start <= range.end && range.end <= it.end }
@@ -21,5 +24,6 @@ case class RangeConnector(ranges: List[BigRange] = List()) {
   def contains(rangesToCheck: List[BigRange]): Boolean = rangesToCheck.forall(contains)
 
   def contains(range: BigRange): Boolean = ranges.exists(x => x.start <= range.start && x.end >= range.end)
+
 
 }

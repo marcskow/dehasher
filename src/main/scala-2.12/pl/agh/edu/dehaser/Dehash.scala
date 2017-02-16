@@ -1,5 +1,8 @@
 package pl.agh.edu.dehaser
 
+import scala.collection.immutable.NumericRange
+import scala.language.implicitConversions
+
 trait Dehash {
   // TODO: move these settings to config file
   val defaultAlphabet: String =
@@ -13,5 +16,7 @@ trait Dehash {
     word.reverseIterator.map(char => alphabet.indexOf(char)).zipWithIndex.
       map { case (char, index) => (char + 1) * Math.pow(alphabet.length, index) }.sum.toLong
   }
+
+  implicit def rangeToBigRange(range: NumericRange[BigInt]): BigRange = BigRange(range.start, range.end)
 
 }
