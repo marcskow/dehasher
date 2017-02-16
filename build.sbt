@@ -4,6 +4,10 @@ version := "1.0"
 scalaVersion := "2.12.1"
 
 val akkaVersion = "2.4.16"
+val akkaHttp = "10.0.0"
+val json4s = "3.5.0"
+resolvers += "dka-oss-maven" at "https://dl.bintray.com/dka/oss"
+
 
 libraryDependencies ++= Seq(
   "org.scalatest" % "scalatest_2.12" % "3.0.1" % Test,
@@ -11,7 +15,17 @@ libraryDependencies ++= Seq(
   // Akka
   "com.typesafe.akka" %% "akka-remote" % akkaVersion,
   "com.typesafe.akka" %% "akka-actor" % akkaVersion,
-  "com.typesafe.akka" %% "akka-testkit" % akkaVersion
+  "com.typesafe.akka" %% "akka-testkit" % akkaVersion,
+
+  "com.typesafe.akka" %% "akka-http-core" % akkaHttp,
+  "com.typesafe.akka" %% "akka-http" % akkaHttp,
+  "com.typesafe.akka" %% "akka-http-testkit" % akkaHttp,
+  "com.typesafe.akka" %% "akka-slf4j" % akkaVersion,
+
+  "org.json4s" %% "json4s-jackson" % json4s,
+  "org.json4s" %% "json4s-ext" % json4s,
+
+  "de.heikoseeberger" %% "akka-http-json4s" % "1.6.0" exclude("org.json4s", "json4s-core_2.11")
 )
 
 

@@ -1,10 +1,19 @@
 package pl.agh.edu.dehaser
 
 
+import akka.actor.Status.Success
 import akka.actor.{ActorPath, ActorSystem, Props}
+import akka.http.scaladsl.Http
+import akka.stream.ActorMaterializer
 import com.typesafe.config.ConfigFactory
 
-object Main {
+import scala.util.Failure
+
+object Main extends RestRoutes{
+
+
+  val HOST = "127.0.0.1"
+  val PORT = 80
 
   val remotePath: ActorPath = ActorPath.fromString("akka.tcp://QueueSystem@127.0.0.1:2552/user/queue")
 
@@ -13,6 +22,19 @@ object Main {
       case Some("Queue") => startQueueSystem()
       case Some("Client") => startClientSystem()
       case None => startCoordinatorSystem()
+    }
+
+    val httpSystem = ActorSystem("Rest")
+    val materializer = ActorMaterializer()
+    val ctx = httpSystem.dispatcher
+
+    val bind = Http().bindAndHandle(controllers, HOST, PORT)
+
+    import scala.util.Success
+
+    bind.onComplete {
+      case Success(success) => println(s"Successfully binded to addres ${success.localAddress}")
+      case Failure(ex) => println("Failed to bind to address")
     }
   }
 
