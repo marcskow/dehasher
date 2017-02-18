@@ -20,7 +20,15 @@ case class AskHim(otherCoordinator: ActorRef) extends ProcessingTask
 
 case class DehashIt(hash: String, algo: String, originalSender: ActorRef) extends ProcessingTask
 
-case class CheckHalf(range: BigRange, workDetails: WorkDetails, master: ActorRef, aggregator: ActorRef)
+case class CheckHalf(ranges: List[BigRange], workDetails: WorkDetails, master: ActorRef, parentAggregator: ActorRef)
+
+case class UpdatedRanges(rangeConnector: RangeConnector, workDetails: WorkDetails)
+
+case class UpdatePersonalRange(personalRange: List[BigRange], workDetails: WorkDetails)
+
+case class UpdateSubcontractor(personalRange: List[BigRange], workDetails: WorkDetails)
+
+case class SetParentAggregator(parentAggregator: ActorRef, workDetails: WorkDetails)
 
 case class WorkDetails(hash: String, algo: String)
 
@@ -40,10 +48,12 @@ case object GiveMeRange
 
 case object ImLeaving
 
+case object ImLeavingMsgToParent
+
 case object GiveMeWork
 
 case object OfferTask
 
 case object EverythingChecked
 
-case object IamYourNewChild
+case class IamYourNewChild(personalRange: List[BigRange])

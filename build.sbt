@@ -11,11 +11,11 @@ resolvers += Resolver.bintrayRepo("hseeberger", "maven")
 
 libraryDependencies ++= Seq(
   "org.scalatest" % "scalatest_2.12" % "3.0.1" % Test,
-  "com.github.romix.akka" %% "akka-kryo-serialization" % "0.5.1",
-  // Akka
+  // Akkatest
   "com.typesafe.akka" %% "akka-remote" % akkaVersion,
   "com.typesafe.akka" %% "akka-actor" % akkaVersion,
   "com.typesafe.akka" %% "akka-testkit" % akkaVersion,
+
 
   "com.typesafe.akka" %% "akka-http-core" % akkaHttp,
   "com.typesafe.akka" %% "akka-http" % akkaHttp,
@@ -24,8 +24,11 @@ libraryDependencies ++= Seq(
 
   "org.json4s" %% "json4s-jackson" % json4s,
   "org.json4s" %% "json4s-ext" % json4s,
-
+  
   "de.heikoseeberger" %% "akka-http-json4s" % "1.12.0" exclude("org.json4s", "json4s-core_2.11")
 )
+
+  // because DehashWorkerTest was failing in sbt
+  parallelExecution in Test := false
 
 mainClass in(Compile, run) := Some("pl.agh.edu.dehaser.MainSample")
