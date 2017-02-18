@@ -23,7 +23,15 @@ case class RangeConnector(ranges: List[BigRange] = List()) {
 
   def contains(rangesToCheck: List[BigRange]): Boolean = rangesToCheck.forall(contains)
 
-  def contains(range: BigRange): Boolean = ranges.exists(x => x.start <= range.start && x.end >= range.end)
+  private def contains(range: BigRange): Boolean = ranges.exists(x => x.start <= range.start && x.end >= range.end)
 
+  def diff(assignedRanges: List[BigRange]): List[BigRange] = assignedRanges.flatMap(diff)
+
+  private def diff(assigned: BigRange): List[BigRange] =
+    ranges.map(x => intersection(x, assigned)).filter(x => x.length > 0)
+
+  // todo make right version
+  private def intersection(bigRange1: BigRange, bigRange2: BigRange) =
+    BigRange(bigRange1.start.max(bigRange2.start), bigRange1.end.min(bigRange2.end))
 
 }

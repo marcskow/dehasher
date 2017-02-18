@@ -1,6 +1,6 @@
 package pl.agh.edu.dehaser
 
-import akka.actor.{ActorPath, ActorRef, FSM, LoggingFSM, PoisonPill, Props}
+import akka.actor.{ActorPath, ActorRef, FSM, LoggingFSM, PoisonPill, Props, Terminated}
 
 import scala.concurrent.duration._
 import scala.language.postfixOps
@@ -41,7 +41,6 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
       stay()
   }
 
-  // TODO: subcontracotrs id map actorRef => personal range
   // TODO: parent is watching child for failure
   // TODO: children are watching parent for failure, and go to master
   when(Master) {
@@ -69,9 +68,11 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
       master ! foundIt
       leave(subContractors, aggregator, parent)
 
-    case Event(ImLeaving, data@ProcessData(_, _, _, _, master, _)) =>
-      master ! IamYourNewChild
-      stay() using data.copy(parent = master)
+    case Event(ImLeaving, data@ProcessData(_, _, _, parent, master, _)) =>
+      parentIsGone(data, master)
+
+    case Event(Terminated(actor), data@ProcessData(_, _, _, parent, master, _)) if actor == parent =>
+      parentIsGone(data, master)
 
     case Event(msg: SetParentAggregator, data: ProcessData) =>
       data.aggregator ! msg
@@ -79,8 +80,15 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
 
     case Event(EverythingChecked, ProcessData(subContractors, _, _, parent, _, aggregator)) =>
       leave(subContractors, aggregator, parent)
+
+
   }
 
+
+  private def parentIsGone(data: ProcessData, master: ActorRef) = {
+    master ! IamYourNewChild
+    stay() using data.copy(parent = master)
+  }
 
   private def leave(subContractors: Map[ActorRef, List[BigRange]], aggregator: ActorRef, parent: ActorRef) = {
     subContractors.keys.foreach(_ ! ImLeaving)
@@ -141,6 +149,12 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
 
     case Event(ImLeavingMsgToParent, data@ProcessData(subContractorsCurrent, _, _, _, _, _)) =>
       stay() using data.copy(subContractors = subContractorsCurrent - sender())
+
+    case Event(Terminated(actor), data@ProcessData(subContractors, _, _, _, master, _))
+      if subContractors.contains(actor) =>
+
+      stay() // TODO:
+
 
     case msg => log.error(s"\n\n\n\n\n\n\n\n\n\n\nunhandled msg:$msg\n\n\n\n\n\n\n\n\n\n\n\n")
       stay()
