@@ -1,16 +1,16 @@
 package pl.agh.edu.dehaser
 
-import akka.actor.{ActorLogging, ActorPath, ActorRef, FSM, PoisonPill, Props}
+import akka.actor.{ActorPath, ActorRef, FSM, LoggingFSM, PoisonPill, Props}
 
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
 class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
-  extends FSM[CoordinatorState, CoordinatorData] with Dehash with ActorLogging {
+  extends FSM[CoordinatorState, CoordinatorData] with Dehash
+    with LoggingFSM[CoordinatorState, CoordinatorData] {
 
   private val queue = context.actorSelection(queuePath)
   private val slaves = (1 to nrOfWorkers).map(_ => context.actorOf(DehashWorker.props(alphabet))).toSet
-
 
   startWith(Idle, Uninitialized)
 
@@ -19,7 +19,7 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
       log.info(s"I'm now master coordinator of: hash: $hash algo: $algo")
       val wholeRange = BigRange(1, nrOfIterations(maxNrOfChars))
       val details = WorkDetails(hash, algo)
-      val aggregator = context.actorOf(RangeAggregator.props(List(wholeRange), self, details), "MasterAggregator")
+      val aggregator = context.actorOf(RangeAggregator.props(List(wholeRange), self, details))
       goto(Master) using ProcessData(subContractors = Set.empty[ActorRef],
         details, BigRangeIterator(wholeRange), parent = originalSender,
         masterCoordinator = self, aggregator)
@@ -30,9 +30,10 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
 
     case Event(Invalid | StateTimeout, _) => goto(Idle)
 
-    case Event(CheckHalf(range, details, master, _), _) =>
+    case Event(CheckHalf(range, details, master, parentAggregator), _) =>
       log.info(s"Started processing chunk: $range, : details: $details")
-      val aggregator = context.actorOf(RangeAggregator.props(range, self, details), "ChunkAggregator")
+      val aggregator = context.actorOf(RangeAggregator.props(range, self, details))
+      aggregator ! SetParentAggregator(parentAggregator, details)
       goto(ChunkProcessing) using ProcessData(subContractors = Set.empty[ActorRef], details,
         BigRangeIterator(range), parent = sender(), master, aggregator)
 
@@ -53,7 +54,8 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
       client ! NotFoundIt
       endNode(aggregator)
 
-    case Event(IamYourNewChild, data@ProcessData(subContractors, _, _, _, _, _)) =>
+    case Event(IamYourNewChild, data@ProcessData(subContractors, details, _, _, _, aggregator)) =>
+      sender() ! SetParentAggregator(aggregator, details)
       stay() using data.copy(subContractors = subContractors + sender())
     // TODO: subcontracotrs id map actorRef => personal range
 
@@ -64,20 +66,28 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
 
 
   when(ChunkProcessing) {
-    case Event(foundIt: FoundIt, ProcessData(_, _, _, _, master, _)) =>
+    case Event(foundIt: FoundIt, ProcessData(subContractors, _, _, _, master, aggregator)) =>
       master ! foundIt
-      stay()
+      leave(subContractors, aggregator)
 
     case Event(ImLeaving, data@ProcessData(_, _, _, _, master, _)) =>
       master ! IamYourNewChild
       stay() using data.copy(parent = master)
 
+    case Event(msg: SetParentAggregator, data: ProcessData) =>
+      data.aggregator ! msg
+      stay()
+
     case Event(EverythingChecked, ProcessData(subContractors, _, _, _, _, aggregator)) =>
-      subContractors.foreach(_ ! ImLeaving)
-      aggregator ! ImLeaving
-      goto(Idle) using Uninitialized
+      leave(subContractors, aggregator)
   }
 
+
+  private def leave(subContractors: Set[ActorRef], aggregator: ActorRef) = {
+    subContractors.foreach(_ ! ImLeaving)
+    aggregator ! ImLeaving
+    goto(Idle) using Uninitialized
+  }
 
   onTransition {
     case _ -> Idle => queue ! GiveMeWork
@@ -86,9 +96,8 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
       queue ! OfferTask
 
     case (Master -> Master | ChunkProcessing -> ChunkProcessing) => nextStateData match {
-      case ProcessData(_, _, iterator,, _, _, _) =>
+      case ProcessData(_, _, iterator, _, _, _) =>
         if (iterator.totalLength > splitThreshold) {
-          //todo update for lists
           queue ! OfferTask
         }
       case Uninitialized => log.error("\n\n\n\n\nYou didn't expect me here\n\n\n\n\n\n\n")
@@ -99,17 +108,15 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
 
   whenUnhandled {
     case Event(GiveHalf, data@ProcessData(subContractorsCurrent, details, iter, _, master, aggregator)) =>
-      val optionalRanges = iter.split()
-      if (optionalRanges.isDefined) {
-        val (first, second) = optionalRanges.get
-        sender() ! CheckHalf(second, details, master, aggregator)
-        // TODO: update personal range in aggregtor
-        goto(stateName) using data.copy(subContractors = subContractorsCurrent + sender(),
-          iterator = BigRangeIterator(first))
-      }
-      else {
-        sender() ! Invalid
-        stay()
+      iter.split() match {
+        case Some((first, second)) =>
+          sender() ! CheckHalf(second, details, master, aggregator)
+          aggregator ! UpdatePersonalRange(first, details)
+          goto(stateName) using data.copy(subContractors = subContractorsCurrent + sender(),
+            iterator = BigRangeIterator(first))
+
+        case None => sender() ! Invalid
+          stay()
       }
 
     case Event(CancelComputation, ProcessData(subContractors, _, _, _, _, aggregator)) =>
@@ -121,7 +128,7 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
       atom.foreach(x => sender() ! Check(x, details))
       stay() using data.copy(iterator = iter)
 
-    case Event(rangeChecked@RangeChecked(range, details), data: ProcessData) if details == data.workDetails =>
+    case Event(rangeChecked@RangeChecked(_, details), data: ProcessData) if details == data.workDetails =>
       data.aggregator ! rangeChecked
       val (atom, iter) = data.iterator.next()
       atom.foreach(x => sender() ! Check(x, data.workDetails))

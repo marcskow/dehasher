@@ -6,7 +6,7 @@ import org.scalatest.{FunSpecLike, GivenWhenThen, Matchers}
 import scala.collection.immutable.NumericRange
 
 
-class RangeConnectorTest extends FunSpecLike with GivenWhenThen with Matchers with TableDrivenPropertyChecks {
+class RangeConnectorTest extends FunSpecLike with GivenWhenThen with Matchers with Dehash with TableDrivenPropertyChecks {
 
   describe("RangeConncetor ") {
     it("should add and merge non-overlapping Ranges in addRange method") {

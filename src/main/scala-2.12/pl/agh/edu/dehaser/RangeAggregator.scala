@@ -1,13 +1,12 @@
 package pl.agh.edu.dehaser
 
-import akka.actor.{ActorLogging, ActorRef, FSM, Props}
+import akka.actor.{ActorRef, FSM, LoggingFSM, Props}
 
 import scala.concurrent.duration._
 import scala.language.{implicitConversions, postfixOps}
 
-class RangeAggregator(wholeRange: List[BigRange], coordinator: ActorRef,
-                      workDetails: WorkDetails) extends
-  FSM[AggregatorState, AggregatorData] with ActorLogging with Dehash {
+class RangeAggregator(wholeRange: List[BigRange], coordinator: ActorRef, workDetails: WorkDetails)
+  extends FSM[AggregatorState, AggregatorData] with LoggingFSM[AggregatorState, AggregatorData] with Dehash {
 
   startWith(AggregatorStateImpl, AggregatorData(RangeConnector(), wholeRange))
 
@@ -33,6 +32,10 @@ class RangeAggregator(wholeRange: List[BigRange], coordinator: ActorRef,
       parentAggregator ! UpdatedRanges(whole, workDetails)
       stay()
 
+    case Event(StateTimeout, AggregatorData(_, _, None)) =>
+      log.debug("I'm master aggregator and I got state timeout")
+      stay()
+
     case Event(SetParentAggregator(pAggregator, details), data) if details == workDetails =>
       stay() using data.copy(parentAggregator = Some(pAggregator))
 
@@ -41,7 +44,7 @@ class RangeAggregator(wholeRange: List[BigRange], coordinator: ActorRef,
       stop()
 
 
-    case _ => log.error("\n\n\n\n\nNobody expects Spanish Inquisition\n\n\n\n\n\n\n")
+    case msg => log.error(s"\n\n\n\n\nNobody expects Spanish Inquisition: $msg\n\n\n\n\n\n\n")
       stop()
   }
 

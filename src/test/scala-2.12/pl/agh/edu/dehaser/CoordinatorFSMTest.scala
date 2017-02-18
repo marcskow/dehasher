@@ -50,7 +50,7 @@ class CoordinatorFSMTest extends TestKit(ActorSystem("NodeActorSpec")) with Impl
         coordinator ! CheckHalf(List(range), WorkDetails(hash, algo), masterProbe.ref, aggregatorProbe.ref)
 
         Then(s"FoundIt message should sent \n")
-        masterProbe.expectMsg(300.seconds, FoundIt(dehashed))
+        masterProbe.expectMsg(35.seconds, FoundIt(dehashed))
       }
     }
 
