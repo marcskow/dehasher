@@ -1,4 +1,4 @@
-package pl.agh.edu.dehaser.modules
+package pl.agh.edu.dehaser.modules.task
 
 /**
   * Created by razakroner on 2017-02-16.
@@ -10,5 +10,9 @@ class TaskRepository {
 
   def getTask(id:String) = {
     Task("1219", "e1938h129che")
+  }
+
+  def create(newTask : Task): Int={
+    543123
   }
 }
