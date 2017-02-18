@@ -35,6 +35,10 @@ class RangeAggregator(wholeRange: List[BigRange], coordinator: ActorRef, workDet
       log.debug("I'm master aggregator and I got state timeout")
       stay()
 
+    case Event(update: Update, AggregatorData(whole, _, _)) =>
+      sender() ! whole.ranges
+      stay()
+
     case Event(SetParentAggregator(pAggregator, details), data) if details == workDetails =>
       stay() using data.copy(parentAggregator = Some(pAggregator))
 

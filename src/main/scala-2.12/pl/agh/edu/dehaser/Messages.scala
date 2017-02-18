@@ -20,6 +20,8 @@ case class AskHim(otherCoordinator: ActorRef) extends ProcessingTask
 
 case class DehashIt(hash: String, algo: String, originalSender: ActorRef) extends ProcessingTask
 
+case class Update(taskId: Int)
+
 case class CheckHalf(ranges: List[BigRange], workDetails: WorkDetails, master: ActorRef, parentAggregator: ActorRef)
 
 case class UpdatedRanges(rangeConnector: RangeConnector, workDetails: WorkDetails)
@@ -53,6 +55,8 @@ case object ImLeavingMsgToParent
 case object GiveMeWork
 
 case object OfferTask
+
+case object ListTasks
 
 case object EverythingChecked
 

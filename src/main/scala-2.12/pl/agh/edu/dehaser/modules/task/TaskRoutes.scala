@@ -4,6 +4,8 @@ import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.server.Route
 import pl.agh.edu.dehaser.RestController
 
+import scala.util.{Success, Failure}
+
 /**
   * Created by razakroner on 2017-02-16.
   */
@@ -14,7 +16,10 @@ class TaskRoutes(taskService: TaskService) extends RestController{
   override def endpoints: Route = {
     path(uri) {
       get{
-        complete(OK -> taskService.tasks())
+        onComplete(taskService.tasks()){
+          case Success(list) => complete(OK -> list)
+          case Failure(ex) => complete(BadRequest -> ex)
+        }
       }
     } ~ path(uri/regex){ id =>
       get{
@@ -23,7 +28,11 @@ class TaskRoutes(taskService: TaskService) extends RestController{
     } ~ path(uri){
       post{
         entity(as[Task]){ task =>
-          complete(OK -> taskService.createTask(task))
+          val s = taskService.createTask(task)
+          onComplete(s){
+            case Success(id) => complete(OK -> id)
+            case Failure(ex) => complete(BadRequest -> ex)
+          }
         }
       }
     }

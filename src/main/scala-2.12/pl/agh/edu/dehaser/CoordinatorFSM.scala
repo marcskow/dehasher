@@ -56,7 +56,9 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
     case Event(IamYourNewChild(personalRange), data@ProcessData(subContractors, details, _, _, _, aggregator)) =>
       sender() ! SetParentAggregator(aggregator, details)
       stay() using data.copy(subContractors = subContractors + (sender() -> personalRange))
-
+    case Event(update: Update, data@ProcessData(subContractors, details, _, _, _, aggregator)) =>
+      aggregator forward update
+      stay()
 
     // todo go to some waiting state and wait for others to complete (when range connector will be full) after everything
     // TODO: master check every 60 second, if some ranges were't lost, and retransmits them into queue if needed
@@ -169,12 +171,16 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
   }
 
 
-  private def nrOfIterations(maxStringSize: Int): BigInt = {
+  def nrOfIterations(maxStringSize: Int): BigInt = {
     (1 to maxStringSize).map(x => BigInt(math.pow(alphabet.length, x).toLong)).sum
   }
 }
 
-object CoordinatorFSM {
+object CoordinatorFSM extends Dehash{
   def props(alphabet: String, nrOfWorkers: Int = 4, queuePath: ActorPath): Props =
     Props(new CoordinatorFSM(alphabet, nrOfWorkers, queuePath))
+
+  def nrOfIterations(maxStringSize: Int): BigInt = {
+    (1 to maxStringSize).map(x => BigInt(math.pow(defaultAlphabet.length, x).toLong)).sum
+  }
 }

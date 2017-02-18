@@ -5,6 +5,8 @@ import akka.http.scaladsl.server.Route
 import pl.agh.edu.dehaser.RestController
 import pl.agh.edu.dehaser.modules.task.IdResponse
 
+import scala.util.{Failure, Success}
+
 /**
   * Created by razakroner on 2017-02-16.
   */
@@ -16,7 +18,10 @@ class UpdateRoutes(updateService: UpdateService) extends RestController{
   override def endpoints : Route = {
     path(updateUri/id) { id =>
       get{
-        complete(OK -> updateService.update(id.toInt))
+        onComplete(updateService.update(id.toInt)){
+          case Success(result) => complete(OK -> result)
+          case Failure(ex) => complete(BadRequest -> ex)
+        }
       }
     } ~ path(cancelUri) {
       post{

@@ -13,19 +13,22 @@ object Main extends RestRoutes{
 
   val HOST = "192.168.0.192"
   val PORT = 9000
-
+  implicit val httpSystem = ActorSystem("Rest")
+  implicit val materializer = ActorMaterializer()
+  implicit val ctx = httpSystem.dispatcher
   val remotePath: ActorPath = ActorPath.fromString("akka.tcp://QueueSystem@127.0.0.1:2552/user/queue")
 
   def main(args: Array[String]): Unit = {
-    args.headOption match {
-      case Some("Queue") => startQueueSystem()
-      case Some("Client") => startClientSystem()
-      case None => startCoordinatorSystem()
-    }
+//    args.headOption match {
+//      case Some("Queue") => startQueueSystem()
+////      case Some("Client") => startClientSystem()
+////      case None => startCoordinatorSystem()
+//    }
 
-    implicit val httpSystem = ActorSystem("Rest")
-    implicit val materializer = ActorMaterializer()
-    implicit val ctx = httpSystem.dispatcher
+
+    startQueueSystem()
+
+
 
     val routeFlow = RouteResult.route2HandlerFlow(controllers)
 
@@ -40,10 +43,7 @@ object Main extends RestRoutes{
   }
 
   def startQueueSystem(): Unit = {
-    val system = ActorSystem("QueueSystem",
-      ConfigFactory.load("queue"))
-    val queue = system.actorOf(TaskQueue.props, "queue")
-    val reporter = system.actorOf(Props[Reporter], "reporter")
+    QueueSettings
     //    queue ! DehashIt("4bc75035d73f6083683e040fc31f28e0ec6d1cbce5cb0a5e2611eb89bceb6c16", "SHA-256", reporter) // testhash
     //    queue ! DehashIt("c3904668eebedc5a443f65243d196157d31d19ad4b0b86eb3957449a652aa284", "SHA-256", reporter) // hardcoded
     //    queue ! DehashIt("cf80cd8aed482d5d1527d7dc72fceff84e6326592848447d2dc0b0e87dfc9a90", "SHA-256", reporter) // testing

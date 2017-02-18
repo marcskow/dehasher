@@ -1,11 +1,19 @@
 package pl.agh.edu.dehaser.modules.update
 
+import akka.util.Timeout
+import scala.concurrent.duration._
+import pl.agh.edu.dehaser._
+import akka.pattern._
+
 /**
   * Created by razakroner on 2017-02-16.
   */
-class UpdateRepository {
+class UpdateRepository{
+  implicit val timeout = Timeout(5 seconds)
+
+
   def update(id: Int) = {
-    Result(List(Range("123124","432423"),Range("3213554","65465676")),"346546545434")
+   (QueueSettings.queue ? Update(id)).mapTo[List[BigRange]]
   }
 
   def solution(id: Int) = {

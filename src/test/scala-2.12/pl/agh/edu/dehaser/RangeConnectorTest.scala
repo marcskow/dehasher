@@ -27,10 +27,10 @@ class RangeConnectorTest extends FunSpecLike with GivenWhenThen with Matchers wi
 
     it("should tell whether it contains range in question") {
       val connector = RangeConnector(List(BigRange(1, 10001)))
-      assert(connector.contains(BigRange(BigInt(1), 10001)))
-      assert(connector.contains(BigRange(BigInt(1000), 10001)))
-      assert(connector.contains(BigRange(BigInt(1000), 9001)))
-      assert(!connector.contains(BigRange(BigInt(1000), 11001)))
+      assert(connector.contains(List(BigRange(BigInt(1), 10001))))
+      assert(connector.contains(List(BigRange(BigInt(1000), 10001))))
+      assert(connector.contains(List(BigRange(BigInt(1000), 9001))))
+      assert(!connector.contains(List(BigRange(BigInt(1000), 11001))))
     }
 
     it("should add and merge possibly overlapping Ranges in addRange method") {
