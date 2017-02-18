@@ -26,6 +26,8 @@ case class UpdatedRanges(rangeConnector: RangeConnector, workDetails: WorkDetail
 
 case class UpdatePersonalRange(personalRange: List[BigRange], workDetails: WorkDetails)
 
+case class UpdateSubcontractor(personalRange: List[BigRange], workDetails: WorkDetails)
+
 case class SetParentAggregator(parentAggregator: ActorRef, workDetails: WorkDetails)
 
 case class WorkDetails(hash: String, algo: String)
@@ -46,10 +48,12 @@ case object GiveMeRange
 
 case object ImLeaving
 
+case object ImLeavingMsgToParent
+
 case object GiveMeWork
 
 case object OfferTask
 
 case object EverythingChecked
 
-case object IamYourNewChild
+case class IamYourNewChild(personalRange: List[BigRange])
