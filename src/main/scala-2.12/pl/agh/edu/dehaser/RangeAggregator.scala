@@ -2,7 +2,6 @@ package pl.agh.edu.dehaser
 
 import akka.actor.{ActorRef, FSM, LoggingFSM, Props}
 
-import scala.concurrent.duration._
 import scala.language.{implicitConversions, postfixOps}
 
 class RangeAggregator(wholeRange: List[BigRange], coordinator: ActorRef, workDetails: WorkDetails)
@@ -10,7 +9,7 @@ class RangeAggregator(wholeRange: List[BigRange], coordinator: ActorRef, workDet
 
   startWith(AggregatorStateImpl, AggregatorData(RangeConnector(), wholeRange))
 
-  when(AggregatorStateImpl, stateTimeout = 30 seconds) {
+  when(AggregatorStateImpl, stateTimeout = reloadTime) {
     // TODO:  if details == workDetails  might me redundant. Remove in final version
     case Event(RangeChecked(range, details), data@AggregatorData(whole, personalRange, _)) if details == workDetails =>
       val updated = whole.addRange(range)
