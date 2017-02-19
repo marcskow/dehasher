@@ -48,6 +48,10 @@ class RangeAggregator(wholeRange: List[BigRange], coordinator: ActorRef, workDet
       parentAggregator ! UpdatedRanges(whole, workDetails)
       stop()
 
+    case Event(AddDiffRanges(deadRanges), data: AggregatorData) =>
+      val rangesToCompute = data.wholeRangeConnector.diff(deadRanges)
+      sender() ! ComputedDiffs(rangesToCompute)
+      stay() using data.copy(personalRange = (data.personalRange ++ deadRanges).sortBy(_.start))
 
     case msg => log.error(s"\n\n\n\n\nNobody expects Spanish Inquisition: $msg\n\n\n\n\n\n\n")
       stop()

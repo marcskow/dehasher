@@ -9,11 +9,13 @@ case class BigRange(start: BigInt, end: BigInt) {
 }
 
 class BigRangeIterator(val ranges: List[BigRange], val totalLength: BigInt) extends Dehash {
+  def addRanges(newRanges: List[BigRange]): BigRangeIterator =
+    newRanges.foldLeft(this) { case (conn, curr) => conn.addRange(curr) }
+
   def addRange(range: BigRange): BigRangeIterator = {
     require(range.end >= range.start, s"range: $range")
     BigRangeIterator(ranges :+ range)
   }
-
 
   def next(): (Option[NumericRange[BigInt]], BigRangeIterator) = {
     ranges.headOption match {
