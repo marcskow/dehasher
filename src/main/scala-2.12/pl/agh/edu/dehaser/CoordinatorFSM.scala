@@ -63,6 +63,12 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
       aggregator forward update
       stay()
 
+    case Event(CancelComputation, ProcessData(subContractors, _, _, _, _, aggregator)) =>
+      subContractors.keys.foreach(_ ! CancelComputation)
+      sender() ! NotFoundIt
+      endNode(aggregator)
+
+
     // todo go to some waiting state and wait for others to complete (when range connector will be full) after everything
     // TODO: master check every 60 second, if some ranges were't lost, and retransmits them into queue if needed
   }

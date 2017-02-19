@@ -8,19 +8,14 @@ import akka.pattern._
 /**
   * Created by razakroner on 2017-02-16.
   */
-class UpdateRepository{
+class UpdateRepository {
   implicit val timeout = Timeout(5 seconds)
 
-
   def update(id: Int) = {
-   (QueueSettings.queue ? Update(id)).mapTo[List[BigRange]]
-  }
-
-  def solution(id: Int) = {
-    Response(1,"test")
+    (QueueSettings.queue ? Update(id)).mapTo[Result]
   }
 
   def removeTask(id: Int) = {
-    println(s"task $id removed")
+    (QueueSettings.queue ? CancelTask(id)).mapTo[Result]
   }
 }

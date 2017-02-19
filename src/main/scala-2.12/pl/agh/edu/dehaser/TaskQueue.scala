@@ -31,12 +31,18 @@ class TaskQueue extends LoggingFSM[QueueState, QueueData] {
     case Event(update: Update, QueueData(list, workers)) =>
       workers.getOrElse(update.taskId, "NoneTaken") match {
         case Some(worker:ActorRef) => worker forward update
-        case None => sender() ! None
-        case "NoneTaken" => sender() ! "Nontaken"
+        case None => sender() ! NonTaken
+        case "NoneTaken" => sender() ! NonExisting
       }
       stay() using QueueData(list, workers)
+    case Event(x: CancelTask, QueueData(list, workers)) =>
+      workers.getOrElse(x.id, "Nonetaken") match {
+        case Some(worker:ActorRef) => worker forward CancelComputation
+        case None => sender() ! NonTaken
+        case "NoneTaken" => sender() ! NonExisting
+      }
+      stay() using QueueData(list, workers - x.id)
   }
-
   initialize()
 }
 

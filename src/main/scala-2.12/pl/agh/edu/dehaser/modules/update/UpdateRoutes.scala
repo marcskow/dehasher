@@ -26,6 +26,10 @@ class UpdateRoutes(updateService: UpdateService) extends RestController{
     } ~ path(cancelUri) {
       post{
         entity(as[IdResponse]){ id =>
+//          onComplete(updateService.cancel(id.id)){
+//            case Success(result) => complete(OK -> result)
+//            case Failure(ex) => complete(BadRequest -> ex)
+//          }
           updateService.cancel(id.id)
           complete("Task canceled successfully")
         }
