@@ -25,13 +25,24 @@ case class RangeConnector(ranges: List[BigRange] = List()) {
 
   private def contains(range: BigRange): Boolean = ranges.exists(x => x.start <= range.start && x.end >= range.end)
 
-  def diff(assignedRanges: List[BigRange]): List[BigRange] = assignedRanges.flatMap(diff)
+  def diff(declaredRanges: List[BigRange]): List[BigRange] = {
+    val uncomputed = for (
+      declared <- declaredRanges;
+      negated <- negated(declaredRanges)
+    ) yield intersection(declared, negated)
+    uncomputed.filter(_.length > 0).sortBy(_.start)
+  }
 
-  private def diff(assigned: BigRange): List[BigRange] =
-    ranges.map(x => intersection(x, assigned)).filter(x => x.length > 0)
 
-  // todo make right version
-  private def intersection(bigRange1: BigRange, bigRange2: BigRange) =
+  private def intersection(bigRange1: BigRange, bigRange2: BigRange): BigRange =
     BigRange(bigRange1.start.max(bigRange2.start), bigRange1.end.min(bigRange2.end))
 
+  private def negated(declaredRanges: List[BigRange]) = {
+    val starting = BigRange(declaredRanges.head.start, ranges.head.start)
+    val ending = BigRange(ranges.last.end, declaredRanges.last.end)
+    negate(ranges) ++ List(starting, ending).filter(_.length > 0)
+  }
+
+  private def negate(listOfRanges: List[BigRange]) =
+    listOfRanges.sliding(2, 1).map { case List(fst, snd) => BigRange(fst.end, snd.start) }.toList
 }

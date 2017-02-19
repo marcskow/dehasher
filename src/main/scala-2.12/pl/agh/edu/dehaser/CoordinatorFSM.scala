@@ -41,8 +41,6 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
       stay()
   }
 
-  // TODO: parent is watching child for failure
-  // TODO: children are watching parent for failure, and go to master
   when(Master) {
     case Event(FoundIt(crackedPass), ProcessData(subContractors, _, _, client, _, aggregator)) =>
       client ! Cracked(crackedPass) //todo it this needed ?
@@ -162,11 +160,13 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
     case Event(ImLeavingMsgToParent, data@ProcessData(subContractorsCurrent, _, _, _, _, _)) =>
       stay() using data.copy(subContractors = subContractorsCurrent - sender())
 
-    case Event(Terminated(actor), data@ProcessData(subContractors, _, _, _, master, _))
-      if subContractors.contains(actor) =>
+    case Event(Terminated(actor), data: ProcessData)
+      if data.subContractors.contains(actor) =>
+      data.aggregator ! AddDiffRanges(data.subContractors(actor))
+      stay() using data.copy(subContractors = data.subContractors - actor)
 
-      stay() // TODO:
-
+    case Event(ComputedDiffs(diffRanges), data: ProcessData) =>
+      goto(stateName) using data.copy(iterator = data.iterator.addRanges(diffRanges))
 
     case msg => log.error(s"\n\n\n\n\n\n\n\n\n\n\nunhandled msg:$msg\n\n\n\n\n\n\n\n\n\n\n\n")
       stay()
