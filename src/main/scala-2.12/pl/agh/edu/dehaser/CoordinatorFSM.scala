@@ -162,11 +162,15 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
 
     case Event(Terminated(actor), data: ProcessData)
       if data.subContractors.contains(actor) =>
-      data.aggregator ! AddDiffRanges(data.subContractors(actor))
+      val childRange = data.subContractors(actor)
+      data.aggregator ! AddDiffRanges(childRange)
+      log.info(s"child died. His range was: $childRange")
       stay() using data.copy(subContractors = data.subContractors - actor)
 
     case Event(ComputedDiffs(diffRanges), data: ProcessData) =>
-      goto(stateName) using data.copy(iterator = data.iterator.addRanges(diffRanges))
+      val it = data.iterator.addRanges(diffRanges)
+      log.info(s"My new iterator is: $it")
+      goto(stateName) using data.copy(iterator = it)
 
     case msg => log.error(s"\n\n\n\n\n\n\n\n\n\n\nunhandled msg:$msg\n\n\n\n\n\n\n\n\n\n\n\n")
       stay()

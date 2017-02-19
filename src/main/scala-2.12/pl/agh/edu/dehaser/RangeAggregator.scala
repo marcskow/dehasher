@@ -50,6 +50,8 @@ class RangeAggregator(wholeRange: List[BigRange], coordinator: ActorRef, workDet
 
     case Event(AddDiffRanges(deadRanges), data: AggregatorData) =>
       val rangesToCompute = data.wholeRangeConnector.diff(deadRanges)
+      log.info(s"whole range in this moment is: $wholeRange")
+      log.info(s"diffs to compute are: $wholeRange")
       sender() ! ComputedDiffs(rangesToCompute)
       stay() using data.copy(personalRange = (data.personalRange ++ deadRanges).sortBy(_.start))
 

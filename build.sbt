@@ -31,4 +31,4 @@ libraryDependencies ++= Seq(
   // because DehashWorkerTest was failing in sbt
   parallelExecution in Test := false
 
-mainClass in(Compile, run) := Some("pl.agh.edu.dehaser.MainSample")
+mainClass in(Compile, run) := Some("pl.agh.edu.dehaser.Main")

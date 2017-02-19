@@ -2,7 +2,7 @@ package pl.agh.edu.dehaser
 
 import scala.collection.immutable.NumericRange
 import scala.concurrent.duration._
-import scala.language.implicitConversions
+import scala.language.{implicitConversions, postfixOps}
 
 trait Dehash {
   // TODO: move these settings to config file
