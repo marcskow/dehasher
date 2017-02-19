@@ -1,0 +1,237 @@
+@import url("http://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.5.4/bootstrap-select.min.css");
+
+body
+{
+	background-color: #E8E8E8;  %#DCDCDC;
+  	font-family: 'Ubuntu', sans-serif;
+}
+
+code
+{
+	font-size: 15px;
+	font-weight: lighter;
+	opacity: 0.7;
+}
+
+img 
+{
+    margin: 10px;
+}
+
+.myProgress {
+	margin-left: 220px;
+	width: 40%;
+	background-color: #ddd;
+}
+
+.myBar {
+	width: 0%;
+	height: 30px;
+	background-color: #4CAF50;
+}
+
+.myLabel {
+	padding-left: 10px;
+	text-align: center;
+	line-height: 30px;
+	color: white;
+}
+
+#container
+{
+	width: 1200px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+#logo
+{
+	color: black;
+	margin-top: 30px;
+	margin-bottom: 30px;
+	font-size: 60px;
+	letter-spacing: 4px;
+	font-weight: bold;
+	text-align:center;
+}
+
+#menu
+{
+	background-color: white; %#90979F;
+	margin-top: 0px;
+	color: black;
+	padding: 10px; 
+}
+
+#topbar
+{
+	background-color: #004c99;
+	color: white;
+	width: 100% - 20px;
+	padding: 10px;
+	margin-top: 15px;
+	margin-bottom: 15px;
+	height: 200px;
+}
+
+#topbarL
+{
+	float: left;
+	width: 138px;
+	padding: 20px;
+	text-align: center;
+}
+
+#topbarR
+{
+	float: left;
+	padding: 20px;
+	width: 760px;
+	font-size: 16px;
+	text-align: justify;
+	%border-left: 2px solid #cccccc;
+}
+
+#sidebar
+{
+	float: left;
+	margin-left: 0;
+	width: 148px;
+	min-height: inherit;
+	padding: 20px;
+	background-color: #ffffff;
+	text-align: center;
+	font-size: 18px;
+	border-right: 2px solid #666666;
+	margin-right: 20px;
+}
+
+#content
+{
+	padding: 80px;
+	background-color: white; %#dedede;
+	text-align: justify;
+}
+
+#footer
+{
+	color: white;
+	padding: 20px;
+	text-align: center;
+	font-size: 18px;
+	clear: both;
+	background-color: #90979F;
+}
+
+
+
+#underOption
+{
+	
+	height: 25px;
+	font-size: 18px;
+	padding: 10px;
+	border-bottom: 2px solid #444444;
+	border-top: 2px solid #444444;
+	opacity: 0.8;
+}
+
+#underOption:hover
+{
+	background-color: #004c99;
+	color: white;
+	cursor: pointer;
+}
+
+#clickedOption
+{
+	background-color: #004c99;
+	height: 25px;
+	font-size: 18px;
+	padding: 10px;
+	border-bottom: 2px solid #444444;
+	opacity: 0.8;
+	color: white;
+}
+
+#clickedOption:hover
+{
+	cursor: pointer;
+}
+
+.option
+{
+	float: left;
+	min-width: 120px;
+	height: 25px;
+	font-size: 18px;
+	padding: 10px;
+	margin-left: 5px; 
+	margin-right: 5px;
+	%border-right: 2px solid #444444;
+	border: 4px groove #444444;
+	opacity: 0.8;
+	text-align: center;
+}
+
+.option:hover
+{
+	background-color: #ADC8EC;
+	cursor: pointer;
+}
+
+option.clicked
+{
+	background-color: #004c99;
+	color: white;
+}
+
+.optionL
+{
+	height: 25px;
+	font-size: 18px;
+	padding: 10px;
+	border-bottom: 2px solid #444444;
+	opacity: 0.8;
+}
+
+.optionL:hover
+{
+	background-color: #bbbbbb;
+	color: white;
+	cursor: pointer;
+}
+
+.bigtitle
+{
+	font-size: 32px;
+	font-weight: 700;
+	letter-spacing: 1px;
+}
+
+.dottedline
+{
+	height: 5px;
+	margin-top: 15px;
+	margin-bottom: 20px;
+	border-bottom: 2px solid #444444;
+}
+
+.optionT
+{
+	background-color: #666CCB;
+	height: 25px;
+	font-size: 18px;
+	padding: 5px;
+	border-bottom: 2px dotted #444444;
+	opacity: 0.8;
+	color: white;
+	width: 138px;
+}
+
+.optionT:hover
+{
+	background-color: #A4A9EE;
+	color: white;
+	cursor: pointer;
+}
