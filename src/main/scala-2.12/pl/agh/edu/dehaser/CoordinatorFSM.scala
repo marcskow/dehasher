@@ -45,18 +45,21 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
   // TODO: children are watching parent for failure, and go to master
   when(Master) {
     case Event(FoundIt(crackedPass), ProcessData(subContractors, _, _, client, _, aggregator)) =>
-      client ! Cracked(crackedPass)
+      client ! Cracked(crackedPass) //todo it this needed ?
       subContractors.keys.foreach(_ ! CancelComputation)
-      endNode(aggregator)
+      aggregator ! PoisonPill
+      goto(WaitingToDie) using Finished(Cracked(crackedPass))
 
-    case Event(EverythingChecked, ProcessData(_, _, _, client, _, aggregator)) =>
-      client ! NotFoundIt
-      endNode(aggregator)
+    case Event(CheckedWholeRange, ProcessData(_, _, _, client, _, aggregator)) =>
+      client ! NotFoundIt //todo it this needed ?
+      aggregator ! PoisonPill
+      goto(WaitingToDie) using Finished(NotFoundIt)
 
     case Event(IamYourNewChild(personalRange), data@ProcessData(subContractors, details, _, _, _, aggregator)) =>
       sender() ! SetParentAggregator(aggregator, details)
       stay() using data.copy(subContractors = subContractors + (sender() -> personalRange))
-    case Event(update: Update, data@ProcessData(subContractors, details, _, _, _, aggregator)) =>
+
+    case Event(update: Update, ProcessData(_, _, _, _, _, aggregator)) =>
       aggregator forward update
       stay()
 
@@ -64,6 +67,11 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
     // TODO: master check every 60 second, if some ranges were't lost, and retransmits them into queue if needed
   }
 
+  when(WaitingToDie) {
+    case Event(_: Update, Finished(result)) =>
+      sender() ! result
+      goto(Idle) using Uninitialized
+  }
 
   when(ChunkProcessing) {
     case Event(foundIt: FoundIt, ProcessData(subContractors, _, _, parent, master, aggregator)) =>
@@ -80,23 +88,19 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
       data.aggregator ! msg
       stay()
 
-    case Event(EverythingChecked, ProcessData(subContractors, _, _, parent, _, aggregator)) =>
+    case Event(CheckedPersonalRange, ProcessData(subContractors, _, _, parent, _, aggregator)) =>
       leave(subContractors, aggregator, parent)
 
 
   }
 
+  def nrOfIterations(maxStringSize: Int): BigInt = {
+    (1 to maxStringSize).map(x => BigInt(math.pow(alphabet.length, x).toLong)).sum
+  }
 
   private def parentIsGone(data: ProcessData, master: ActorRef) = {
     master ! IamYourNewChild
     stay() using data.copy(parent = master)
-  }
-
-  private def leave(subContractors: Map[ActorRef, List[BigRange]], aggregator: ActorRef, parent: ActorRef) = {
-    subContractors.keys.foreach(_ ! ImLeaving)
-    aggregator ! ImLeaving
-    parent ! ImLeavingMsgToParent
-    goto(Idle) using Uninitialized
   }
 
   onTransition {
@@ -164,19 +168,21 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
 
   initialize()
 
+  private def leave(subContractors: Map[ActorRef, List[BigRange]], aggregator: ActorRef, parent: ActorRef) = {
+    subContractors.keys.foreach(_ ! ImLeaving)
+    aggregator ! ImLeaving
+    parent ! ImLeavingMsgToParent
+    goto(Idle) using Uninitialized
+  }
 
   private def endNode(aggregator: ActorRef) = {
     aggregator ! PoisonPill
     goto(Idle) using Uninitialized
   }
-
-
-  def nrOfIterations(maxStringSize: Int): BigInt = {
-    (1 to maxStringSize).map(x => BigInt(math.pow(alphabet.length, x).toLong)).sum
-  }
 }
 
-object CoordinatorFSM extends Dehash{
+
+object CoordinatorFSM extends Dehash {
   def props(alphabet: String, nrOfWorkers: Int = 4, queuePath: ActorPath): Props =
     Props(new CoordinatorFSM(alphabet, nrOfWorkers, queuePath))
 

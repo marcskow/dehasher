@@ -7,6 +7,7 @@ import scala.language.{implicitConversions, postfixOps}
 class RangeAggregator(wholeRange: List[BigRange], coordinator: ActorRef, workDetails: WorkDetails)
   extends FSM[AggregatorState, AggregatorData] with LoggingFSM[AggregatorState, AggregatorData] with Dehash {
 
+
   startWith(AggregatorStateImpl, AggregatorData(RangeConnector(), wholeRange))
 
   when(AggregatorStateImpl, stateTimeout = reloadTime) {
@@ -14,7 +15,8 @@ class RangeAggregator(wholeRange: List[BigRange], coordinator: ActorRef, workDet
     case Event(RangeChecked(range, details), data@AggregatorData(whole, personalRange, _)) if details == workDetails =>
       val updated = whole.addRange(range)
       if (updated.contains(personalRange)) {
-        coordinator ! EverythingChecked
+        coordinator ! CheckedPersonalRange
+        checkWholeRange(whole)
       }
       //      log.info(s"checked: ${personal.ranges} out of: $personalRange [personal] ")
       stay() using data.copy(wholeRangeConnector = updated)
@@ -49,6 +51,10 @@ class RangeAggregator(wholeRange: List[BigRange], coordinator: ActorRef, workDet
 
     case msg => log.error(s"\n\n\n\n\nNobody expects Spanish Inquisition: $msg\n\n\n\n\n\n\n")
       stop()
+  }
+
+  private def checkWholeRange(wholeRangeConnector: RangeConnector) = {
+    if (wholeRangeConnector.contains(wholeRange)) coordinator ! CheckedWholeRange
   }
 
   initialize()

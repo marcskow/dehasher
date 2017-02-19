@@ -10,6 +10,7 @@ case object Master extends CoordinatorState
 
 case object ChunkProcessing extends CoordinatorState
 
+case object WaitingToDie extends CoordinatorState
 
 sealed trait CoordinatorData
 
@@ -20,3 +21,4 @@ case class ProcessData(subContractors: Map[ActorRef, List[BigRange]], workDetail
                        iterator: BigRangeIterator, parent: ActorRef,
                        masterCoordinator: ActorRef, aggregator: ActorRef) extends CoordinatorData
 
+case class Finished(result: Result) extends CoordinatorData

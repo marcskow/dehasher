@@ -40,9 +40,11 @@ case object CancelComputation
 
 case object Invalid
 
-case class Cracked(dehashed: String)
+sealed trait Result
 
-case object NotFoundIt
+case class Cracked(dehashed: String) extends Result
+
+case object NotFoundIt extends Result
 
 case object WorkAvailable
 
@@ -58,6 +60,8 @@ case object OfferTask
 
 case object ListTasks
 
-case object EverythingChecked
+case object CheckedPersonalRange
+
+case object CheckedWholeRange
 
 case class IamYourNewChild(personalRange: List[BigRange])
