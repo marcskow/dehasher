@@ -17,4 +17,4 @@ libraryDependencies ++= Seq(
 
 
 
-mainClass in(Compile, run) := Some("pl.agh.edu.dehaser.MainSample")
+mainClass in(Compile, run) := Some("pl.agh.edu.dehaser.Main")
