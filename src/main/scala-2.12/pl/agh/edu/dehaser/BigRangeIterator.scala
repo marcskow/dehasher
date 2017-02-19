@@ -2,35 +2,47 @@ package pl.agh.edu.dehaser
 
 import scala.collection.immutable.NumericRange
 
-case class BigRange(start: BigInt, end: BigInt)
+case class BigRange(start: BigInt, end: BigInt) {
+  val length: BigInt = end - start
 
-class BigRangeIterator(range: BigRange) extends Dehash {
-  //  require(range.end >= range.start, s"range: $range")
+  def contains(otherRange: BigRange): Boolean = otherRange.start >= start && otherRange.end <= end
+}
 
-  private val nextValue = if (range.end > range.start)
-    Some(range.start until (range.start + atomSize))
-  else None
-
-  // TODO: may produce neagative ranges (start > end)
-  def next: (Option[NumericRange[BigInt]], BigRangeIterator) = {
-    val nextIt = BigRangeIterator(BigRange(range.start + atomSize, range.end))
-    (nextValue, nextIt)
+class BigRangeIterator(val ranges: List[BigRange], val totalLength: BigInt) extends Dehash {
+  def addRange(range: BigRange): BigRangeIterator = {
+    require(range.end >= range.start, s"range: $range")
+    BigRangeIterator(ranges :+ range)
   }
 
-  def split(): Option[(BigRange, BigRange)] = {
-    val length = range.end - range.start + 1
-    val atomLength = length / atomSize
-    if (length < splitThreshold) None
+
+  def next(): (Option[NumericRange[BigInt]], BigRangeIterator) = {
+    ranges.headOption match {
+      case Some(head) => if (head.start + atomSize < head.end) {
+        val chunk = head.start until (head.start + atomSize)
+        val truncatedHead = BigRange(head.start + atomSize, head.end)
+        (Some(chunk), BigRangeIterator(truncatedHead :: ranges.tail))
+      } else {
+        val chunk = head.start until head.end
+        (Some(chunk), BigRangeIterator(ranges.tail))
+      }
+      case None => (None, BigRangeIterator(Nil))
+    }
+
+  }
+
+
+  def split(): Option[(List[BigRange], List[BigRange])] = {
+    if (totalLength < splitThreshold) None
     else {
-      val half: BigInt = (atomLength / 2) * atomSize
-      //noinspection ScalaUnnecessaryParentheses
-      val splitPoint: BigInt = (range.start) + half
-      Some(BigRange(range.start, splitPoint), BigRange(splitPoint, range.end + 1))
+      val first = ranges.map(r => BigRange(r.start, r.start + r.length / 2))
+      val second = ranges.map(r => BigRange(r.start + r.length / 2, r.end))
+      Some(first, second)
     }
   }
 }
 
 object BigRangeIterator {
-  def apply(range: BigRange): BigRangeIterator = new BigRangeIterator(range)
-}
+  def apply(singleRange: BigRange): BigRangeIterator = new BigRangeIterator(List(singleRange), singleRange.end - singleRange.start)
 
+  def apply(ranges: List[BigRange]): BigRangeIterator = new BigRangeIterator(ranges, ranges.map(_.length).sum)
+}

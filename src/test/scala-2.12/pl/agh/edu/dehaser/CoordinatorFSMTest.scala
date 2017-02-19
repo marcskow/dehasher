@@ -1,7 +1,7 @@
 package pl.agh.edu.dehaser
 
 import akka.actor.ActorSystem
-import akka.testkit.{ImplicitSender, TestFSMRef, TestKit, TestProbe}
+import akka.testkit.{ImplicitSender, TestKit, TestProbe}
 import org.scalatest._
 import org.scalatest.prop.TableDrivenPropertyChecks
 
@@ -33,22 +33,6 @@ class CoordinatorFSMTest extends TestKit(ActorSystem("NodeActorSpec")) with Impl
   describe("Coordinator") {
     // TODO: test splitting task
 
-    it("should  go Idle after cheking range") {
-      val coordinator = TestFSMRef(new CoordinatorFSM(a_z, nrOfWorkers = 4, queueStub.ref.path))
-      val hashes =
-        Table(
-          ("hash", "dehashed", "algo", "range"), // First tuple defines column names
-          ("0efdc6151ea756af355d3fc133f4e8b2145c70a2", "alicja", "SHA-1", BigRange(aaRange, lalaRange)) //,
-        )
-      forAll(hashes) { (hash, dehashed, algo, range) =>
-        Given(s"alphabet: $a_z  \n hash: $hash \n algo: $algo \n range: $range ")
-        When("Check message is send")
-        coordinator ! CheckHalf(range, WorkDetails(hash, algo), masterProbe.ref, aggregatorProbe.ref)
-
-        Then(s"should go Idle  \n")
-        awaitCond(coordinator.stateName === Idle)
-      }
-    }
 
     it("should find solution") {
       val coordinator = system.actorOf(CoordinatorFSM.props(a_z, queuePath = queueStub.ref.path), "coordinator4")
@@ -63,10 +47,10 @@ class CoordinatorFSMTest extends TestKit(ActorSystem("NodeActorSpec")) with Impl
         Given(s"alphabet: $a_z  \n hash: $hash \n algo: $algo \n range: $range ")
 
         When("Check message is send")
-        coordinator ! CheckHalf(range, WorkDetails(hash, algo), masterProbe.ref, aggregatorProbe.ref)
+        coordinator ! CheckHalf(List(range), WorkDetails(hash, algo), masterProbe.ref, aggregatorProbe.ref)
 
         Then(s"FoundIt message should sent \n")
-        masterProbe.expectMsg(300.seconds, FoundIt(dehashed))
+        masterProbe.expectMsg(35.seconds, FoundIt(dehashed))
       }
     }
 
@@ -77,7 +61,7 @@ class CoordinatorFSMTest extends TestKit(ActorSystem("NodeActorSpec")) with Impl
       val range = BigRange(lalaRange, aaaaaaaRange)
 
       When("CheckHalf message is sent")
-      coordinator ! CheckHalf(range, WorkDetails("kjnkbbuyvb", "SHA-1"), masterProbe.ref, aggregatorProbe.ref)
+      coordinator ! CheckHalf(List(range), WorkDetails("kjnkbbuyvb", "SHA-1"), masterProbe.ref, aggregatorProbe.ref)
 
       Then("queue should get OfferTask msg")
       queue.fishForMessage(1 second) { case OfferTask => true; case _ => false }
