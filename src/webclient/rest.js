@@ -7,7 +7,7 @@ function getMethodType() {
 
 function sendTaskAsynchronous() {
     var xhr = new XMLHttpRequest();
-    xhr.open("POST", "http://demo0237352.mockable.io/task", true);
+    xhr.open("POST", "http://192.168.0.192:9000/task", true);
     xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
 
     var taskBody = document.getElementById("task-body").value;
@@ -40,7 +40,7 @@ function getTaskIdByNumber(progressNumber) {
 //http://localhost:8080/update/
 function getTaskState(progressNumber) {
     var xhr = new XMLHttpRequest();
-    xhr.open("GET", "http://demo0237352.mockable.io/update/" + getTaskIdByNumber(progressNumber), true);
+    xhr.open("GET", "http://192.168.0.192:9000/update/" + getTaskIdByNumber(progressNumber), true);
 
     xhr.onreadystatechange = function processRequest() {
         if ((this.readyState == 4) && (this.status == 200)) {
@@ -59,7 +59,7 @@ function getTaskState(progressNumber) {
 
 function closeTask(progressNumber) {
     var xhr = new XMLHttpRequest();
-    xhr.open("POST", "http://demo0237352.mockable.io/close/" + getTaskIdByNumber(progressNumber), true);
+    xhr.open("POST", "http://192.168.0.192:9000/close/" + getTaskIdByNumber(progressNumber), true);
 
     xhr.onreadystatechange = function processRequest() {
         if ((this.readyState == 4) && (this.status == 200)) {
