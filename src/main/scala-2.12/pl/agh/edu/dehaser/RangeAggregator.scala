@@ -1,6 +1,7 @@
 package pl.agh.edu.dehaser
 
 import akka.actor.{ActorRef, FSM, LoggingFSM, Props}
+import pl.agh.edu.dehaser.messages._
 
 import scala.language.{implicitConversions, postfixOps}
 

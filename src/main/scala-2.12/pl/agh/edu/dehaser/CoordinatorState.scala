@@ -1,6 +1,7 @@
 package pl.agh.edu.dehaser
 
 import akka.actor.ActorRef
+import pl.agh.edu.dehaser.messages.{Result, WorkDetails}
 
 sealed trait CoordinatorState
 

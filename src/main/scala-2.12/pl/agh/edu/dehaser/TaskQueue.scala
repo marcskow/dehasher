@@ -1,7 +1,7 @@
 package pl.agh.edu.dehaser
 
-import akka.pattern._
 import akka.actor.{ActorRef, LoggingFSM, Props}
+import pl.agh.edu.dehaser.messages._
 import pl.agh.edu.dehaser.modules.task.IdResponse
 
 
@@ -16,7 +16,7 @@ class TaskQueue extends LoggingFSM[QueueState, QueueData] {
       sender() ! IdResponse(id)
       stay() using QueueData(list :+ task, workers + (id -> None), taskMapper + (id -> task.hash))
 
-    case Event(GiveMeWork, QueueData(list, workers, taskMapper)) => {
+    case Event(GiveMeWork, QueueData(list, workers, taskMapper)) =>
       if (list.nonEmpty) {
         list.head match {
           case initialTask: DehashIt => sender() ! initialTask
@@ -30,7 +30,6 @@ class TaskQueue extends LoggingFSM[QueueState, QueueData] {
       }else{
         stay() using QueueData(list, workers, taskMapper)
       }
-    }
 
 
     case Event(ListTasks, QueueData(list, workers, taskMapper)) =>

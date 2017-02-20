@@ -1,15 +1,18 @@
 package pl.agh.edu.dehaser.modules.update
 
 import pl.agh.edu.dehaser._
+import pl.agh.edu.dehaser.messages._
+
+import scala.concurrent.{ExecutionContextExecutor, Future}
 
 /**
   * Created by razakroner on 2017-02-16.
   */
 class UpdateService(repository: UpdateRepository) extends Dehash {
-  implicit val ctx = QueueSettings.ctx
-  val wholeRange = CoordinatorFSM.nrOfIterations(maxNrOfChars).toString
+  implicit val ctx: ExecutionContextExecutor = QueueSettings.ctx
+  val wholeRange: String = CoordinatorFSM.nrOfIterations(maxNrOfChars).toString
 
-  def update(id: Int) = {
+  def update(id: Int): Future[Product with Serializable] = {
     val response = repository.update(id)
     response.map{
       case cracked: Cracked => Response(1, cracked.dehashed)
@@ -22,7 +25,7 @@ class UpdateService(repository: UpdateRepository) extends Dehash {
     }
   }
 
-  def cancel(id: Int) = {
+  def cancel(id: Int): Future[Response] = {
     val response = repository.removeTask(id)
     response.map{
       case NotFoundIt => Response(1, s"Task $id canceled")

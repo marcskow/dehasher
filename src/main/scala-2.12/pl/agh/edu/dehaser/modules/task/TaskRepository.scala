@@ -1,10 +1,13 @@
 package pl.agh.edu.dehaser.modules.task
 
+import akka.pattern._
 import akka.util.Timeout
 import pl.agh.edu.dehaser._
-import akka.pattern._
-import scala.concurrent.duration._
+import pl.agh.edu.dehaser.messages.{DehashIt, ListTasks, ProcessingTask}
+
 import scala.concurrent.Future
+import scala.concurrent.duration._
+import scala.language.postfixOps
 
 /**
   * Created by razakroner on 2017-02-16.
@@ -12,12 +15,12 @@ import scala.concurrent.Future
 class TaskRepository {
   implicit val timeout = Timeout(5 seconds)
 
-  def getAllTasks = {
+  def getAllTasks: Future[List[ProcessingTask]] = {
     val response = QueueSettings.queue ? ListTasks
     response.mapTo[List[ProcessingTask]]
   }
 
-  def getTask(id:String) = {
+  def getTask(id: String): Task = {
     Task("1219", "e1938h129che", 10)
   }
 

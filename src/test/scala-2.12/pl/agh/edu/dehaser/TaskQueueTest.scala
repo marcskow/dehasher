@@ -1,9 +1,10 @@
 package pl.agh.edu.dehaser
 
 import akka.actor.{ActorSystem, Props}
-import akka.testkit.{ImplicitSender, TestKit, TestProbe}
+import akka.testkit.{ImplicitSender, TestKit}
 import org.scalatest._
 import org.scalatest.prop.TableDrivenPropertyChecks
+import pl.agh.edu.dehaser.messages.{AskHim, DehashIt, GiveMeWork, OfferTask}
 
 class TaskQueueTest extends TestKit(ActorSystem("NodeActorSpec")) with ImplicitSender
   with FunSpecLike with GivenWhenThen with Matchers with TableDrivenPropertyChecks with Dehash with BeforeAndAfterAll {
