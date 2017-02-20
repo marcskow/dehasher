@@ -11,31 +11,23 @@ object Main extends RestRoutes {
 
 
   def main(args: Array[String]): Unit = {
+    startQueueSystem
 //    args.headOption match {
 //      case Some("Queue") => startQueueSystem()
-//      case Some("Client") => startClientSystem()
 //      case None => startCoordinatorSystem()
 //    }
-
-        startQueueSystem()
-        import RestSettings._
-        val routeFlow = RouteResult.route2HandlerFlow(controllers)
-        val bind = Http().bindAndHandle(routeFlow, HOST, PORT)
-
-        import scala.util.{Success,Failure}
-
-        bind.onComplete {
-          case Success(success) => println(s"Successfully binded to addres ${success.localAddress}")
-          case Failure(ex) => println("Failed to bind to address")
-        }
   }
 
   def startQueueSystem(): Unit = {
+    import QueueSettings._
+    val routeFlow = RouteResult.route2HandlerFlow(controllers)
+    val bind = Http().bindAndHandle(routeFlow, QueueSettings.HOST, QueueSettings.PORT)
 
-    QueueSettings
-    //    queue ! DehashIt("4bc75035d73f6083683e040fc31f28e0ec6d1cbce5cb0a5e2611eb89bceb6c16", "SHA-256", reporter) // testhash
-    //    queue ! DehashIt("c3904668eebedc5a443f65243d196157d31d19ad4b0b86eb3957449a652aa284", "SHA-256", reporter) // hardcoded
-    //    queue ! DehashIt("cf80cd8aed482d5d1527d7dc72fceff84e6326592848447d2dc0b0e87dfc9a90", "SHA-256", reporter) // testing
+    import scala.util.{Success,Failure}
+    bind.onComplete {
+      case Success(success) => println(s"Successfully binded to addres ${success.localAddress}")
+      case Failure(ex) => println("Failed to bind to address")
+    }
     println("Started queueSystem - waiting for messages")
   }
 

@@ -1,6 +1,6 @@
 package pl.agh.edu.dehaser.modules.task
 
-import pl.agh.edu.dehaser.{DehashIt, RestSettings}
+import pl.agh.edu.dehaser.{DehashIt, QueueSettings}
 
 import scala.concurrent.Future
 
@@ -8,7 +8,7 @@ import scala.concurrent.Future
   * Created by razakroner on 2017-02-16.
   */
 class TaskService(repository: TaskRepository) {
-  implicit val ctx = RestSettings.ctx
+  implicit val ctx = QueueSettings.ctx
   def tasks() = {
     repository.getAllTasks.map(_.map{
       case DehashIt(hash, algo, id, sender, range) => Task(hash, algo, range)
