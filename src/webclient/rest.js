@@ -20,11 +20,11 @@ function sendTaskAsynchronous() {
         if ((this.readyState == 4) && (this.status == 200)) {
             var response = JSON.parse(this.responseText);
             if(response == null || response == ''){
-                alert("Sending task failed");
+                console.log("Sending task failed");
             } else {
                 tasksIds[taskBody] = response["id"];
                 addNewTask();
-                alert('Task id: ' + response["id"]);
+                console.log('Task id: ' + response["id"]);
             }
         }
     };
@@ -46,9 +46,9 @@ function getTaskState(progressNumber) {
         if ((this.readyState == 4) && (this.status == 200)) {
             var response = this.responseText;
             if(response == null || response == ''){
-                alert("Updating task info failed");
+                console.log("Updating task info failed");
             } else {
-                alert(response);
+                console.log(response);
                 handleTaskUpdate(progressNumber, JSON.parse(response));
             }
         }
@@ -65,10 +65,10 @@ function closeTask(progressNumber) {
         if ((this.readyState == 4) && (this.status == 200)) {
             var response = this.responseText;
             if(response == null || response == ''){
-                alert("Closing task failed");
+                console.log("Closing task failed");
             } else {
-                alert(response);
-                handleClose(progressNumber);
+                console.log(response);
+                handleClose(progressNumber, JSON.parse(response));
             }
         }
     };

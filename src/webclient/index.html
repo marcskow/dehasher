@@ -24,6 +24,7 @@
     <script src="frontend.js"></script>
     <script src="rest.js"></script>
     <script src="mechanics.js"></script>
+    <script src="updater.js"></script>
 </head>
 <body>
 <div id="container">
@@ -41,9 +42,11 @@
         <div style="float: left; margin-right: 40px">
             <select id="method-dropdown" class="selectpicker" data-style="btn-primary" style="display: none; margin-right: 40px">
                 <option>SHA-1</option>
-                <option>SHA-2</option>
-                <option>SHA-3</option>
+                <option>SHA-256</option>
+                <option>MD-5</option>
             </select>
+            <br />
+            <button id="autoupdate-button" type="button" class="btn btn-danger" onclick="autoupdate()">AutoUpdate Disabled</button>
         </div>
 
         <div class="input-group" style="width: 60%">

@@ -1,8 +1,33 @@
 var newMaxForNormalization = 100;
 var initialReady;
 
-function handleClose(progressNumber) {
+function handleClose(progressNumber, response) {
     deleteProgressBar(progressNumber);
+}
+
+function handleClose2(progressNumber, response) {
+    var code = parseInt(response["code"]);
+    switch (code) {
+        case 1: deleteProgressBar(progressNumber); break;
+        case 2: console.log("Task not started yet"); break; //TODO powinno być w takim razie tak że on sobie gdzieś zapisuje żeby go zamknąć
+        case 3: console.log("Task not existing");
+    }
+}
+
+function handleTaskUpdate2(progressNumber, response) {
+    var code;
+    if(!"code" in response) {
+        code = 5;
+    } else {
+        code = parseInt(response["code"]);
+    }
+    switch (code) {
+        case 1: solutionFound(progressNumber, response["solution"]); break;
+        case 2: solutionDoesNotExist(progressNumber); break;
+        case 3: console.log("Task not started yet"); break; //TODO powinno być w takim razie tak że on sobie gdzieś zapisuje żeby go zamknąć
+        case 4: console.log("Task not existing"); break;
+        case 5: handleTaskUpdate(progressNumber, response);
+    }
 }
 
 function handleTaskUpdate(progressNumber, response) {
