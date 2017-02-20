@@ -20,8 +20,8 @@ class TaskRepository {
     response.mapTo[List[ProcessingTask]]
   }
 
-  def getTask(id: String): Task = {
-    Task("1219", "e1938h129che", 10)
+  def getTask(id: String): TaskWithId = {
+    TaskWithId(12 ,"1219", "e1938h129che", 10)
   }
 
   def create(newTask : Task): Future[IdResponse]={
