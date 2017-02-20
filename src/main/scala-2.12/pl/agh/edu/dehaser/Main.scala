@@ -22,6 +22,7 @@ object Main extends RestRoutes {
         import RestSettings._
         val routeFlow = RouteResult.route2HandlerFlow(controllers)
         val bind = Http().bindAndHandle(routeFlow, HOST, PORT)
+
         import scala.util.{Success,Failure}
 
         bind.onComplete {
@@ -52,7 +53,7 @@ object Main extends RestRoutes {
 
 
   def startClientSystem(): Unit = {
-    lazy val remotePath: ActorPath = ActorPath.fromString("akka.tcp://QueueSystem@127.0.0.1:2552/user/queue")
+    lazy val remotePath: ActorPath = ActorPath.fromString("akka.tcp://Rest@127.0.0.1:2552/user/queue")
     val system = ActorSystem("ClientSystem",
       ConfigFactory.load("client"))
     val reporter = system.actorOf(Props[Reporter], "reporter")

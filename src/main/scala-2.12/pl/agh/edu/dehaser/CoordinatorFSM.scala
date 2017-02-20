@@ -51,6 +51,7 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
       client ! Cracked(crackedPass) //todo it this needed ?
       subContractors.keys.foreach(_ ! CancelComputation)
       aggregator ! PoisonPill
+      log.info(s"Found solution $crackedPass")
       goto(WaitingToDie) using Finished(Cracked(crackedPass))
 
     case Event(CheckedWholeRange, ProcessData(_, _, _, client, _, aggregator)) =>

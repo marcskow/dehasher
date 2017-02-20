@@ -10,22 +10,29 @@ class TaskQueue extends LoggingFSM[QueueState, QueueData] {
   startWith(QueueStateImpl, QueueData(List(),Map(), Map()))
 
   when(QueueStateImpl) {
-    case Event(OfferTask, QueueData(list,workers,taskMapper)) => stay() using QueueData(list :+ AskHim(sender()), workers, taskMapper)
+    case Event(OfferTask, QueueData(list, workers, taskMapper)) => stay() using QueueData(list :+ AskHim(sender()), workers, taskMapper)
     case Event(task: DehashIt, QueueData(list, workers, taskMapper)) =>
-      val id = Math.abs((task.hash+task.algo).hashCode)
-        sender() ! IdResponse(id)
-      stay() using QueueData(list :+ task, workers + (id -> None), taskMapper + (id->task.hash))
+      val id = Math.abs((task.hash + task.algo).hashCode)
+      sender() ! IdResponse(id)
+      stay() using QueueData(list :+ task, workers + (id -> None), taskMapper + (id -> task.hash))
 
     case Event(GiveMeWork, QueueData(list, workers, taskMapper)) => {
-      list.headOption.foreach{
-        case initialTask: DehashIt => sender() ! initialTask
-          val id = Math.abs((initialTask.hash+initialTask.algo).hashCode)
-          workers + (id -> sender())
-        case task => sender() ! task
+      if (list.nonEmpty) {
+        list.head match {
+          case initialTask: DehashIt => sender() ! initialTask
+            val id = Math.abs((initialTask.hash + initialTask.algo).hashCode)
+            val tail = if (list.nonEmpty) list.tail else List()
+            stay() using QueueData(tail, workers + (id -> Some(sender())), taskMapper)
+          case task => sender() ! task
+            val tail = if (list.nonEmpty) list.tail else List()
+            stay() using QueueData(tail, workers, taskMapper)
+        }
+      }else{
+        stay() using QueueData(list, workers, taskMapper)
       }
-      val tail = if (list.nonEmpty) list.tail else List()
-      stay() using QueueData(tail, workers, taskMapper)
-     }
+    }
+
+
     case Event(ListTasks, QueueData(list, workers, taskMapper)) =>
       sender() ! list
       stay() using QueueData(list, workers, taskMapper)

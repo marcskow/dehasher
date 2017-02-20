@@ -16,7 +16,7 @@ object RestSettings {
 }
 
 object QueueSettings {
-  val system = ActorSystem("QueueSystem", ConfigFactory.load("queue"))
-  val queue = system.actorOf(TaskQueue.props, "queue")
-  val reporter = system.actorOf(Props[Reporter], "reporter")
+//  val system = ActorSystem("QueueSystem", ConfigFactory.load("queue"))
+  val queue = RestSettings.httpSystem.actorOf(TaskQueue.props, "queue")
+  val reporter = RestSettings.httpSystem.actorOf(Props[Reporter], "reporter")
 }

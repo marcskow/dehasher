@@ -7,7 +7,7 @@ import pl.agh.edu.dehaser._
   */
 class UpdateService(repository: UpdateRepository) extends Dehash {
   implicit val ctx = RestSettings.ctx
-  val wholeRange = BigRange(1, CoordinatorFSM.nrOfIterations(maxNrOfChars)).toString
+  val wholeRange = CoordinatorFSM.nrOfIterations(maxNrOfChars).toString
 
   def update(id: Int) = {
     val response = repository.update(id)
