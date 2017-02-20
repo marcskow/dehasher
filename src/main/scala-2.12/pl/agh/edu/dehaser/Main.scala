@@ -2,6 +2,8 @@ package pl.agh.edu.dehaser
 
 
 import akka.actor.{ActorPath, ActorSystem, Props}
+import akka.http.scaladsl.Http
+import akka.http.scaladsl.server.RouteResult
 import com.typesafe.config.ConfigFactory
 
 object Main extends RestRoutes {
@@ -9,27 +11,23 @@ object Main extends RestRoutes {
 
 
   def main(args: Array[String]): Unit = {
-    args.headOption match {
-      case Some("Queue") => startQueueSystem()
-      case Some("Client") => startClientSystem()
-      case None => startCoordinatorSystem()
-    }
+//    args.headOption match {
+//      case Some("Queue") => startQueueSystem()
+//      case Some("Client") => startClientSystem()
+//      case None => startCoordinatorSystem()
+//    }
 
 
-    //    startQueueSystem()
-    //
-    //
-    //
-    //    val routeFlow = RouteResult.route2HandlerFlow(controllers)
-    //
-    //    val bind = Http().bindAndHandle(routeFlow,HOST,PORT)
-    //
-    //    import scala.util.Success
-    //
-    //    bind.onComplete {
-    //      case Success(success) => println(s"Successfully binded to addres ${success.localAddress}")
-    //      case Failure(ex) => println("Failed to bind to address")
-    //    }
+        startQueueSystem()
+        import RestSettings._
+        val routeFlow = RouteResult.route2HandlerFlow(controllers)
+        val bind = Http().bindAndHandle(routeFlow, HOST, PORT)
+        import scala.util.{Success,Failure}
+
+        bind.onComplete {
+          case Success(success) => println(s"Successfully binded to addres ${success.localAddress}")
+          case Failure(ex) => println("Failed to bind to address")
+        }
   }
 
   def startQueueSystem(): Unit = {
