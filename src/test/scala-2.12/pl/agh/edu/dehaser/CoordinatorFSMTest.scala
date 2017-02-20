@@ -73,8 +73,8 @@ class CoordinatorFSMTest extends TestKit(ActorSystem("NodeActorSpec")) with Impl
       val coordinator = system.actorOf(CoordinatorFSM.props(a_z, queuePath = queue.ref.path), "coordinator")
       val range = BigRange(lalaRange, aaaaaaaRange)
 
-      When("DehashIt message is sent")
-      coordinator ! DehashIt("kjnkbbuyvb", "SHA-1", TestProbe().ref)
+//      When("DehashIt message is sent")
+//      coordinator ! DehashIt("kjnkbbuyvb", "SHA-1", TestProbe().ref)
 
       Then("queue should get OfferTask msg")
       queue.fishForMessage(1 second) { case OfferTask => true; case _ => false }

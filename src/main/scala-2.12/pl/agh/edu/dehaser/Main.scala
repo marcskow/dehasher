@@ -17,7 +17,6 @@ object Main extends RestRoutes {
 //      case None => startCoordinatorSystem()
 //    }
 
-
         startQueueSystem()
         import RestSettings._
         val routeFlow = RouteResult.route2HandlerFlow(controllers)
@@ -52,22 +51,22 @@ object Main extends RestRoutes {
   }
 
 
-  def startClientSystem(): Unit = {
-    lazy val remotePath: ActorPath = ActorPath.fromString("akka.tcp://Rest@127.0.0.1:2552/user/queue")
-    val system = ActorSystem("ClientSystem",
-      ConfigFactory.load("client"))
-    val reporter = system.actorOf(Props[Reporter], "reporter")
-
-    while (true) {
-      val queue = system.actorSelection(remotePath)
-      System.out.println("Please write your hash: \n")
-      val hash = scala.io.StdIn.readLine()
-      System.out.println("Please write algorithm [SHA-256 | MD5 |SHA-1]: \n")
-      val algo = scala.io.StdIn.readLine()
-
-      queue ! DehashIt(hash, algo, reporter)
-      System.out.println("Task dispatched \n")
-    }
-
-  }
+//  def startClientSystem(): Unit = {
+//    lazy val remotePath: ActorPath = ActorPath.fromString("akka.tcp://Rest@127.0.0.1:2552/user/queue")
+//    val system = ActorSystem("ClientSystem",
+//      ConfigFactory.load("client"))
+//    val reporter = system.actorOf(Props[Reporter], "reporter")
+//
+//    while (true) {
+//      val queue = system.actorSelection(remotePath)
+//      System.out.println("Please write your hash: \n")
+//      val hash = scala.io.StdIn.readLine()
+//      System.out.println("Please write algorithm [SHA-256 | MD5 |SHA-1]: \n")
+//      val algo = scala.io.StdIn.readLine()
+//
+//      queue ! DehashIt(hash, algo, reporter)
+//      System.out.println("Task dispatched \n")
+//    }
+//
+//  }
 }

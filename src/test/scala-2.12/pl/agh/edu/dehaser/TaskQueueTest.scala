@@ -22,8 +22,8 @@ class TaskQueueTest extends TestKit(ActorSystem("NodeActorSpec")) with ImplicitS
 
       When("someone offers task")
       queue ! OfferTask
-      And("someone sends DehashIt")
-      queue ! DehashIt("dfdgfhgz", "MD5", TestProbe().ref)
+//      And("someone sends DehashIt")
+//      queue ! DehashIt("dfdgfhgz", "MD5", TestProbe().ref)
 
       And("someone else sends GiveMeWork")
       queue ! GiveMeWork

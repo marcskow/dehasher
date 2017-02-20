@@ -18,7 +18,7 @@ sealed trait ProcessingTask
 
 case class AskHim(otherCoordinator: ActorRef) extends ProcessingTask
 
-case class DehashIt(hash: String, algo: String, originalSender: ActorRef) extends ProcessingTask
+case class DehashIt(hash: String, algo: String, taskId: Int, originalSender: ActorRef, maxIter: Int) extends ProcessingTask
 
 case class Update(taskId: Int)
 

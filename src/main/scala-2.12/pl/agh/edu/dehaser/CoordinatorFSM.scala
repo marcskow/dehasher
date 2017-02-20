@@ -18,9 +18,9 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
 
 
   when(Idle, stateTimeout = idleReloadTime) {
-    case Event(DehashIt(hash, algo, originalSender), _) =>
+    case Event(DehashIt(hash, algo, id ,originalSender, iterations), _) =>
       log.info(s"\n\nI'm now master coordinator of: hash: $hash algo: $algo\n\n")
-      val wholeRange = BigRange(1, nrOfIterations(maxNrOfChars))
+      val wholeRange = BigRange(1, nrOfIterations(iterations))
       val details = WorkDetails(hash, algo)
       val aggregator = context.actorOf(RangeAggregator.props(List(wholeRange), self, details))
       // TODO: watxh  originalSender or not?

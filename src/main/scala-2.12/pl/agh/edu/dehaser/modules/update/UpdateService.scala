@@ -28,6 +28,7 @@ class UpdateService(repository: UpdateRepository) extends Dehash {
       case NotFoundIt => Response(1, s"Task $id canceled")
       case NonTaken => Response(2, "Task not taken")
       case NonExisting => Response(3, "Task not existing")
+      case _ => Response(8, "???")
     }
   }
 }

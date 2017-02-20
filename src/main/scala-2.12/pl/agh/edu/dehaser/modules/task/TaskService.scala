@@ -11,7 +11,7 @@ class TaskService(repository: TaskRepository) {
   implicit val ctx = RestSettings.ctx
   def tasks() = {
     repository.getAllTasks.map(_.map{
-      case DehashIt(hash, algo, sender) => Task(hash, algo)
+      case DehashIt(hash, algo, id, sender, range) => Task(hash, algo, range)
       case _ =>
     })
   }

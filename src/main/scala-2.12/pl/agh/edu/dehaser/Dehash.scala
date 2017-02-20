@@ -12,7 +12,7 @@ trait Dehash {
 
   val atomSize = 50000
   val splitThreshold: Int = 20 * atomSize
-  val maxNrOfChars = 10
+  val maxNrOfChars = 6
 
   // TODO: testing value
   val reloadTime: FiniteDuration = 1 seconds

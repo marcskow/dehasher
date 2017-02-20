@@ -18,11 +18,12 @@ class TaskRepository {
   }
 
   def getTask(id:String) = {
-    Task("1219", "e1938h129che")
+    Task("1219", "e1938h129che", 10)
   }
 
   def create(newTask : Task): Future[IdResponse]={
-    val response = QueueSettings.queue ? DehashIt(newTask.hash, newTask.algoType, QueueSettings.queue)
+    val id = Math.abs((newTask.hash + newTask.algoType).hashCode)
+    val response = QueueSettings.queue ? DehashIt(newTask.hash, newTask.algoType, id,  QueueSettings.queue, newTask.range)
     response.mapTo[IdResponse]
   }
 }
