@@ -15,7 +15,7 @@ trait Dehash {
   val maxNrOfChars = 10
 
   // TODO: testing value
-  val reloadTime: FiniteDuration = 3 seconds
+  val reloadTime: FiniteDuration = 1 seconds
 
   def stringToNumber(word: String, alphabet: String): BigInt = {
     word.reverseIterator.map(char => alphabet.indexOf(char)).zipWithIndex.

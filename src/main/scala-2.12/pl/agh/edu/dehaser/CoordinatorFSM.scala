@@ -9,19 +9,21 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
   extends FSM[CoordinatorState, CoordinatorData] with Dehash
     with LoggingFSM[CoordinatorState, CoordinatorData] {
 
+  val idleReloadTime: FiniteDuration = 3 seconds
   private val queue = context.actorSelection(queuePath)
   private val slaves = (1 to nrOfWorkers).map(_ => context.actorOf(DehashWorker.props(alphabet))).toSet
 
   startWith(Idle, Uninitialized)
 
-  when(Idle, stateTimeout = 30 seconds) {
+
+  when(Idle, stateTimeout = idleReloadTime) {
     case Event(DehashIt(hash, algo, originalSender), _) =>
-      log.info(s"I'm now master coordinator of: hash: $hash algo: $algo")
+      log.info(s"\n\nI'm now master coordinator of: hash: $hash algo: $algo\n\n")
       val wholeRange = BigRange(1, nrOfIterations(maxNrOfChars))
       val details = WorkDetails(hash, algo)
       val aggregator = context.actorOf(RangeAggregator.props(List(wholeRange), self, details))
       goto(Master) using ProcessData(subContractors = Map.empty[ActorRef, List[BigRange]],
-        details, BigRangeIterator(wholeRange), parent = originalSender,
+        details, BigRangeIterator(List(wholeRange)), parent = originalSender,
         masterCoordinator = self, aggregator)
 
     case Event(AskHim(otherCoordinator), _) =>
@@ -29,9 +31,9 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
       stay()
 
     case Event(Invalid | StateTimeout, _) => goto(Idle)
-
+    // TODO: watch your parent!!!!!!!!!!!!!!!!!! 
     case Event(CheckHalf(range, details, master, parentAggregator), _) =>
-      log.info(s"Started processing chunk: $range, : details: $details")
+      log.info(s"\n\nStarted processing chunk: $range, : details: $details\n\n")
       val aggregator = context.actorOf(RangeAggregator.props(range, self, details))
       aggregator ! SetParentAggregator(parentAggregator, details)
       goto(ChunkProcessing) using ProcessData(subContractors = Map.empty[ActorRef, List[BigRange]], details,
@@ -55,6 +57,7 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
 
     case Event(IamYourNewChild(personalRange), data@ProcessData(subContractors, details, _, _, _, aggregator)) =>
       sender() ! SetParentAggregator(aggregator, details)
+      context.watch(sender())
       stay() using data.copy(subContractors = subContractors + (sender() -> personalRange))
 
     case Event(update: Update, ProcessData(_, _, _, _, _, aggregator)) =>
@@ -83,9 +86,11 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
       leave(subContractors, aggregator, parent)
 
     case Event(ImLeaving, data@ProcessData(_, _, _, parent, master, _)) =>
+      log.info("\n\n\n\n My parent Left me !!!!! \n\n\n\n\n\n")
       parentIsGone(data, master)
 
     case Event(Terminated(actor), data@ProcessData(_, _, _, parent, master, _)) if actor == parent =>
+      log.info("\n\n\n\n My parent Died !!!!! \n\n\n\n\n\n")
       parentIsGone(data, master)
 
     case Event(msg: SetParentAggregator, data: ProcessData) =>
@@ -131,6 +136,7 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
           sender() ! CheckHalf(second, details, master, aggregator)
           aggregator ! UpdatePersonalRange(first, details)
           parent ! UpdateSubcontractor(first, details)
+          context.watch(sender())
           goto(stateName) using data.copy(subContractors = subContractorsCurrent + (sender() -> second),
             iterator = BigRangeIterator(first))
 
@@ -154,26 +160,32 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
       stay() using data.copy(iterator = iter)
 
     case Event(RangeChecked(range, details), _) =>
-      log.debug(s"I got range: $range about $details, but it is not processed anymore, so I ignore this message")
+      log.debug(s"\n\nI got range: $range about $details, but it is not processed anymore, so I ignore this message\n\n")
       stay()
 
     case Event(ImLeavingMsgToParent, data@ProcessData(subContractorsCurrent, _, _, _, _, _)) =>
+      context.unwatch(sender())
       stay() using data.copy(subContractors = subContractorsCurrent - sender())
 
     case Event(Terminated(actor), data: ProcessData)
       if data.subContractors.contains(actor) =>
       val childRange = data.subContractors(actor)
       data.aggregator ! AddDiffRanges(childRange)
-      log.info(s"child died. His range was: $childRange")
+      log.info(s"\n\nchild died. His range was: $childRange\n\n")
+      context.unwatch(actor)
       stay() using data.copy(subContractors = data.subContractors - actor)
 
-    case Event(ComputedDiffs(diffRanges), data: ProcessData) =>
+    case Event(ComputedDiffs(diffRanges, updatedPersonal), data: ProcessData) =>
       val it = data.iterator.addRanges(diffRanges)
-      log.info(s"My new iterator is: $it")
+      data.parent ! UpdateSubcontractor(updatedPersonal, data.workDetails)
+      log.info(s"\n\nMy new iterator is: $it\n\n")
       goto(stateName) using data.copy(iterator = it)
 
+    case Event(UpdateSubcontractor(updatedRange, details), data: ProcessData) if details == data.workDetails =>
+      stay() using data.copy(subContractors = data.subContractors + (sender() -> updatedRange))
+
     case msg => log.error(s"\n\n\n\n\n\n\n\n\n\n\nunhandled msg:$msg\n\n\n\n\n\n\n\n\n\n\n\n")
-      stay()
+      stop()
   }
 
   initialize()

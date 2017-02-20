@@ -40,7 +40,11 @@ case class RangeConnector(ranges: List[BigRange] = List()) {
   private def negated(declaredRanges: List[BigRange]) = {
     val starting = BigRange(declaredRanges.head.start, ranges.head.start)
     val ending = BigRange(ranges.last.end, declaredRanges.last.end)
-    negate(ranges) ++ List(starting, ending).filter(_.length > 0)
+    val holes = ranges match {
+      case _ :: Nil => Nil
+      case manyElements => negate(manyElements)
+    }
+    holes ++ List(starting, ending).filter(_.length > 0)
   }
 
   private def negate(listOfRanges: List[BigRange]) =

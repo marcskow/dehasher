@@ -8,7 +8,9 @@ case class BigRange(start: BigInt, end: BigInt) {
   def contains(otherRange: BigRange): Boolean = otherRange.start >= start && otherRange.end <= end
 }
 
-class BigRangeIterator(val ranges: List[BigRange], val totalLength: BigInt) extends Dehash {
+case class BigRangeIterator(ranges: List[BigRange]) extends Dehash {
+  val totalLength: BigInt = ranges.map(_.length).sum
+
   def addRanges(newRanges: List[BigRange]): BigRangeIterator =
     newRanges.foldLeft(this) { case (conn, curr) => conn.addRange(curr) }
 
@@ -41,10 +43,4 @@ class BigRangeIterator(val ranges: List[BigRange], val totalLength: BigInt) exte
       Some(first, second)
     }
   }
-}
-
-object BigRangeIterator {
-  def apply(singleRange: BigRange): BigRangeIterator = new BigRangeIterator(List(singleRange), singleRange.end - singleRange.start)
-
-  def apply(ranges: List[BigRange]): BigRangeIterator = new BigRangeIterator(ranges, ranges.map(_.length).sum)
 }

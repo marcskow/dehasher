@@ -32,9 +32,11 @@ case class UpdateSubcontractor(personalRange: List[BigRange], workDetails: WorkD
 
 case class SetParentAggregator(parentAggregator: ActorRef, workDetails: WorkDetails)
 
+case object UpdateTick
+
 case class AddDiffRanges(personalRangeSubcontractor: List[BigRange])
 
-case class ComputedDiffs(diffRanges: List[BigRange])
+case class ComputedDiffs(diffRanges: List[BigRange], updatedPersonalRange: List[BigRange])
 
 case class WorkDetails(hash: String, algo: String)
 

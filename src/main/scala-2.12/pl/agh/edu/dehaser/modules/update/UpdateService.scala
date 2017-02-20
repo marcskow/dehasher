@@ -6,7 +6,7 @@ import pl.agh.edu.dehaser._
   * Created by razakroner on 2017-02-16.
   */
 class UpdateService(repository: UpdateRepository) extends Dehash {
-  implicit val ctx = Main.ctx
+  implicit val ctx = QueueSettings.ctx
   val wholeRange = BigRange(1, CoordinatorFSM.nrOfIterations(maxNrOfChars)).toString
 
   def update(id: Int) = {
