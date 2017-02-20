@@ -2,13 +2,13 @@ package pl.agh.edu.dehaser
 
 import akka.actor.{ActorSystem, Props}
 import akka.stream.ActorMaterializer
-import com.typesafe.config.ConfigFactory
 
 /**
   * Created by razakroner on 2017-02-18.
   */
 object RestSettings {
-  val HOST = "192.168.0.192"
+  // TODO: move to config
+  val HOST = "127.0.0.1"
   val PORT = 9000
   implicit val httpSystem = ActorSystem("Rest")
   implicit val materializer = ActorMaterializer()
