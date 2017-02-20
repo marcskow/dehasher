@@ -28,6 +28,8 @@ libraryDependencies ++= Seq(
   "de.heikoseeberger" %% "akka-http-json4s" % "1.12.0" exclude("org.json4s", "json4s-core_2.11")
 )
 
+libraryDependencies += "ch.megard" %% "akka-http-cors" % "0.1.11"
+
   // because DehashWorkerTest was failing in sbt
   parallelExecution in Test := false
 

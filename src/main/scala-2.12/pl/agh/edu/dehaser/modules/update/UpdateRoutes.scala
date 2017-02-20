@@ -4,7 +4,7 @@ import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.server.Route
 import pl.agh.edu.dehaser.RestController
 import pl.agh.edu.dehaser.modules.task.IdResponse
-
+import ch.megard.akka.http.cors.CorsDirectives._
 import scala.util.{Failure, Success}
 
 /**
@@ -15,7 +15,7 @@ class UpdateRoutes(updateService: UpdateService) extends RestController{
   val cancelUri = "cancel"
   val id= """[0-9]+""".r
 
-  override def endpoints : Route = {
+  override def endpoints : Route = cors() {
     path(updateUri/id) { id =>
       get{
         onComplete(updateService.update(id.toInt)){
@@ -23,15 +23,15 @@ class UpdateRoutes(updateService: UpdateService) extends RestController{
           case Failure(ex) => complete(BadRequest -> ex)
         }
       }
-    } ~ path(cancelUri) {
+    } ~ path(cancelUri){
       post{
         entity(as[IdResponse]){ id =>
-//          onComplete(updateService.cancel(id.id)){
-//            case Success(result) => complete(OK -> result)
-//            case Failure(ex) => complete(BadRequest -> ex)
-//          }
-          updateService.cancel(id.id)
-          complete("Task canceled successfully")
+          onComplete(updateService.cancel(id.id)){
+            case Success(result) => complete(OK -> result)
+            case Failure(ex) => complete(BadRequest -> ex)
+          }
+//          updateService.cancel(id.id)
+//          complete("Task canceled successfully")
         }
       }
     }

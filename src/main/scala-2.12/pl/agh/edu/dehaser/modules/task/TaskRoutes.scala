@@ -3,7 +3,7 @@ package pl.agh.edu.dehaser.modules.task
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.server.Route
 import pl.agh.edu.dehaser.RestController
-
+import ch.megard.akka.http.cors.CorsDirectives._
 import scala.util.{Success, Failure}
 
 /**
@@ -13,7 +13,7 @@ class TaskRoutes(taskService: TaskService) extends RestController{
   val uri = "task"
   val regex = """[0-9]+""".r
 
-  override def endpoints: Route = {
+  override def endpoints: Route = cors() {
     path(uri) {
       get{
         onComplete(taskService.tasks()){

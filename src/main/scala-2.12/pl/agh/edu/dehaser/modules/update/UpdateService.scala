@@ -16,7 +16,7 @@ class UpdateService(repository: UpdateRepository) extends Dehash {
       case range: Ranges =>
         val c = range.ranges.map(x => Range(x.start.toString, x.end.toString))
         UpdateResult(c, wholeRange)
-      case NotFoundIt =>  Response(2, "No sollution to given password")
+      case NotFoundIt =>  Response(2, "No solution to given password")
       case NonTaken => Response(3, "Task not taken")
       case NonExisting => Response(4, "Task not existing")
     }
