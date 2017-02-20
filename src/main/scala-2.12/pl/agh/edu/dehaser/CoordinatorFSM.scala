@@ -2,6 +2,7 @@ package pl.agh.edu.dehaser
 
 import akka.actor.{ActorPath, ActorRef, FSM, LoggingFSM, PoisonPill, Props, Terminated}
 import akka.util.Timeout
+import pl.agh.edu.dehaser.algorithms._
 import pl.agh.edu.dehaser.messages._
 
 import scala.concurrent.duration._
@@ -19,7 +20,7 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
 
 
   when(Idle, stateTimeout = idleReloadTime) {
-    case Event(DehashIt(hash, algo, id ,originalSender, iterations), _) =>
+    case Event(DehashIt(hash, algo, id, originalSender, iterations), _) =>
       log.info(s"\n\nI'm now master coordinator of: hash: $hash algo: $algo\n\n")
       val wholeRange = BigRange(1, nrOfIterations(iterations))
       val details = WorkDetails(hash, algo)
@@ -164,13 +165,13 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
 
     case Event(GiveMeRange, data@ProcessData(_, details, iterator, _, _, _)) =>
       val (atom, iter) = iterator.next()
-      atom.foreach(x => sender() ! Check(x, details))
+      atom.foreach(x => sender() ! Check(x, details, AlgoProvider.getAlgorithm(details.algo)))
       stay() using data.copy(iterator = iter)
 
     case Event(rangeChecked@RangeChecked(_, details), data: ProcessData) if details == data.workDetails =>
       data.aggregator ! rangeChecked
       val (atom, iter) = data.iterator.next()
-      atom.foreach(x => sender() ! Check(x, data.workDetails))
+      atom.foreach(x => sender() ! Check(x, data.workDetails, AlgoProvider.getAlgorithm(details.algo)))
       stay() using data.copy(iterator = iter)
 
     case Event(RangeChecked(range, details), _) =>
@@ -215,6 +216,8 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
     aggregator ! PoisonPill
     goto(Idle) using Uninitialized
   }
+
+
 }
 
 
