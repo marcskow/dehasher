@@ -34,6 +34,10 @@ case class SetParentAggregator(parentAggregator: ActorRef, workDetails: WorkDeta
 
 case object UpdateTick
 
+case object GetMyPersonalRanges
+
+case class YourPersonalRanges(personalRanges: List[BigRange])
+
 case class AddDiffRanges(personalRangeSubcontractor: List[BigRange])
 
 case class ComputedDiffs(diffRanges: List[BigRange], updatedPersonalRange: List[BigRange])
@@ -78,4 +82,5 @@ case object CheckedPersonalRange
 
 case object CheckedWholeRange
 
-case class IamYourNewChild(personalRange: List[BigRange])
+case class IamYourNewChild(personalRange: List[BigRange], child: ActorRef)
+

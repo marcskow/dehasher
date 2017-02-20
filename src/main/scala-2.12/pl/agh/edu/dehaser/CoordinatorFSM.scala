@@ -1,6 +1,7 @@
 package pl.agh.edu.dehaser
 
 import akka.actor.{ActorPath, ActorRef, FSM, LoggingFSM, PoisonPill, Props, Terminated}
+import akka.util.Timeout
 
 import scala.concurrent.duration._
 import scala.language.postfixOps
@@ -22,6 +23,7 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
       val wholeRange = BigRange(1, nrOfIterations(maxNrOfChars))
       val details = WorkDetails(hash, algo)
       val aggregator = context.actorOf(RangeAggregator.props(List(wholeRange), self, details))
+      // TODO: watxh  originalSender or not?
       goto(Master) using ProcessData(subContractors = Map.empty[ActorRef, List[BigRange]],
         details, BigRangeIterator(List(wholeRange)), parent = originalSender,
         masterCoordinator = self, aggregator)
@@ -36,6 +38,7 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
       log.info(s"\n\nStarted processing chunk: $range, : details: $details\n\n")
       val aggregator = context.actorOf(RangeAggregator.props(range, self, details))
       aggregator ! SetParentAggregator(parentAggregator, details)
+      context.watch(sender())
       goto(ChunkProcessing) using ProcessData(subContractors = Map.empty[ActorRef, List[BigRange]], details,
         BigRangeIterator(range), parent = sender(), master, aggregator)
 
@@ -55,10 +58,11 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
       aggregator ! PoisonPill
       goto(WaitingToDie) using Finished(NotFoundIt)
 
-    case Event(IamYourNewChild(personalRange), data@ProcessData(subContractors, details, _, _, _, aggregator)) =>
-      sender() ! SetParentAggregator(aggregator, details)
-      context.watch(sender())
-      stay() using data.copy(subContractors = subContractors + (sender() -> personalRange))
+    case Event(IamYourNewChild(personalRange, child), data@ProcessData(subContractors, details, _, _, _, aggregator)) =>
+      log.info(s"\n\n\n\n\n I have new direct child witch personal range: $personalRange\n\n\n\n\n")
+      child ! SetParentAggregator(aggregator, details)
+      context.watch(child)
+      stay() using data.copy(subContractors = subContractors + (child -> personalRange))
 
     case Event(update: Update, ProcessData(_, _, _, _, _, aggregator)) =>
       aggregator forward update
@@ -108,7 +112,15 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
   }
 
   private def parentIsGone(data: ProcessData, master: ActorRef) = {
-    master ! IamYourNewChild
+    context.unwatch(data.parent)
+    import akka.pattern.{ask, pipe}
+
+    implicit val timeout = Timeout(1 seconds)
+    import scala.concurrent.ExecutionContext.Implicits.global
+    val myRef = self
+    val myRanges = (data.aggregator ? GetMyPersonalRanges).mapTo[YourPersonalRanges].map(x => IamYourNewChild(x.personalRanges, myRef))
+    pipe(myRanges) to master
+
     stay() using data.copy(parent = master)
   }
 
@@ -184,7 +196,7 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
     case Event(UpdateSubcontractor(updatedRange, details), data: ProcessData) if details == data.workDetails =>
       stay() using data.copy(subContractors = data.subContractors + (sender() -> updatedRange))
 
-    case msg => log.error(s"\n\n\n\n\n\n\n\n\n\n\nunhandled msg:$msg\n\n\n\n\n\n\n\n\n\n\n\n")
+    case msg => log.error(s"\n\n\n\n\n\n\n\n\n\n\nMY STATE: $stateName \n\n unhandled msg:$msg\n\n\n\n\n\n\n\n\n\n\n\n")
       stop()
   }
 

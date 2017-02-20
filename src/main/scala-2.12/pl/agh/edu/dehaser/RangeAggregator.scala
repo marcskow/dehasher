@@ -61,6 +61,9 @@ class RangeAggregator(wholeRange: List[BigRange], coordinator: ActorRef, workDet
       sender() ! ComputedDiffs(rangesToCompute, updatedPersonal)
       stay() using data.copy(personalRange = updatedPersonal)
 
+    case Event(GetMyPersonalRanges, data: AggregatorData) =>
+      stay() replying YourPersonalRanges(data.personalRange)
+
     case msg => log.error(s"\n\n\n\n\nNobody expects Spanish Inquisition: $msg\n\n\n\n\n\n\n")
       stop()
   }
