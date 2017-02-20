@@ -4,6 +4,7 @@ import java.math.BigInteger
 import java.security.MessageDigest
 
 import akka.actor.{Actor, Props}
+import pl.agh.edu.dehaser.messages._
 
 import scala.annotation.tailrec
 

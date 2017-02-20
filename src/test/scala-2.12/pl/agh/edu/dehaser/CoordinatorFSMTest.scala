@@ -4,6 +4,7 @@ import akka.actor.ActorSystem
 import akka.testkit.{ImplicitSender, TestKit, TestProbe}
 import org.scalatest._
 import org.scalatest.prop.TableDrivenPropertyChecks
+import pl.agh.edu.dehaser.messages._
 
 import scala.concurrent.duration._
 import scala.language.postfixOps

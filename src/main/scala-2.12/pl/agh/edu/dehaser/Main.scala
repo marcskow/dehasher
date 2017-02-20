@@ -9,6 +9,7 @@ import com.typesafe.config.ConfigFactory
 object Main extends RestRoutes {
 
   def main(args: Array[String]): Unit = {
+    //    startQueueSystem
     args.headOption match {
       case Some("Queue") => startQueueSystem()
       case None => startCoordinatorSystem()

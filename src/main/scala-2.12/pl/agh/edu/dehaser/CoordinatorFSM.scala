@@ -2,6 +2,7 @@ package pl.agh.edu.dehaser
 
 import akka.actor.{ActorPath, ActorRef, FSM, LoggingFSM, PoisonPill, Props, Terminated}
 import akka.util.Timeout
+import pl.agh.edu.dehaser.messages._
 
 import scala.concurrent.duration._
 import scala.language.postfixOps
