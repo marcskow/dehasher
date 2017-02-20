@@ -15,7 +15,7 @@ class UpdateRoutes(updateService: UpdateService) extends RestController{
   val cancelUri = "cancel"
   val id= """[0-9]+""".r
 
-  override def endpoints : Route = cors() {
+  override def gatherEndpoints : Route = cors() {
     path(updateUri/id) { id =>
       get{
 //        MOCK

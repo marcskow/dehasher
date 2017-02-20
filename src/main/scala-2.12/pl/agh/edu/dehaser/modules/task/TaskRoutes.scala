@@ -13,7 +13,7 @@ class TaskRoutes(taskService: TaskService) extends RestController{
   val uri = "task"
   val regex = """[0-9]+""".r
 
-  override def endpoints: Route = cors() {
+  override def gatherEndpoints: Route = cors() {
     path(uri) {
       get{
         onComplete(taskService.tasks()){

@@ -20,7 +20,7 @@ class UpdateService(repository: UpdateRepository) extends Dehash {
       case NonTaken => Response(3, "Task not taken")
       case NonExisting => Response(4, "Task not existing")
       case range: Ranges =>
-        val response = range.ranges.map(x => Range(x.start.toString, x.end.toString))
+        val response: List[Range] = range.ranges.map(convertRespoonse)
         UpdateResult(5, response, wholeRange)
     }
   }
@@ -34,4 +34,6 @@ class UpdateService(repository: UpdateRepository) extends Dehash {
       case _ => Response(8, "???")
     }
   }
+  implicit def convertRespoonse(range: BigRange): Range = Range(range.start.toString(), range.end.toString())
+
 }

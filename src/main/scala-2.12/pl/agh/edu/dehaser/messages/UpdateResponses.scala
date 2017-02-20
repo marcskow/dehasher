@@ -10,7 +10,6 @@ case class Ranges(ranges: List[BigRange]) extends Result
 
 case object NotFoundIt extends Result
 
-
 case object NonTaken extends Result
 
 case object NonExisting extends Result
