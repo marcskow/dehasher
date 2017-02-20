@@ -16,12 +16,12 @@ class UpdateService(repository: UpdateRepository) extends Dehash {
     val response = repository.update(id)
     response.map{
       case cracked: Cracked => Response(1, cracked.dehashed)
-      case range: Ranges =>
-        val c = range.ranges.map(x => Range(x.start.toString, x.end.toString))
-        UpdateResult(c, wholeRange)
       case NotFoundIt =>  Response(2, "No solution to given password")
       case NonTaken => Response(3, "Task not taken")
       case NonExisting => Response(4, "Task not existing")
+      case range: Ranges =>
+        val response: List[Range] = range.ranges.map(convertRespoonse)
+        UpdateResult(5, response, wholeRange)
     }
   }
 
@@ -34,4 +34,6 @@ class UpdateService(repository: UpdateRepository) extends Dehash {
       case _ => Response(8, "???")
     }
   }
+  implicit def convertRespoonse(range: BigRange): Range = Range(range.start.toString(), range.end.toString())
+
 }

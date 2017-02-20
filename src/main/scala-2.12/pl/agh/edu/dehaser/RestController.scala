@@ -9,5 +9,5 @@ import de.heikoseeberger.akkahttpjson4s.Json4sSupport
 trait RestController extends Directives with Json4sFormats with Json4sSupport
 {
   val notFound = 404
-  def endpoints: Route= reject
+  def gatherEndpoints: Route = reject
 }

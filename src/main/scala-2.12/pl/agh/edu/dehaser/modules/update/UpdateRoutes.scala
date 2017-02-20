@@ -15,15 +15,15 @@ class UpdateRoutes(updateService: UpdateService) extends RestController{
   val cancelUri = "cancel"
   val id= """[0-9]+""".r
 
-  override def endpoints : Route = cors() {
+  override def gatherEndpoints : Route = cors() {
     path(updateUri/id) { id =>
       get{
-
-        complete(OK -> UpdateResult(List(Range("1", "2050001"), Range("2100001", "3150001"), Range("2100001", "21500010")),"321272406"))
-//        onComplete(updateService.update(id.toInt)){
-//          case Success(result) => complete(OK -> result)
-//          case Failure(ex) => complete(BadRequest -> ex)
-//        }
+//        MOCK
+//        complete(OK -> UpdateResult(5, List(Range("1", "2050001"), Range("2100001", "3150001"), Range("2100001", "21500010")),"321272406"))
+        onComplete(updateService.update(id.toInt)){
+          case Success(result) => complete(OK -> result)
+          case Failure(ex) => complete(BadRequest -> ex)
+        }
       }
     } ~ path(cancelUri){
       post{
@@ -32,8 +32,6 @@ class UpdateRoutes(updateService: UpdateService) extends RestController{
             case Success(result) => complete(OK -> result)
             case Failure(ex) => complete(BadRequest -> ex)
           }
-//          updateService.cancel(id.id)
-//          complete("Task canceled successfully")
         }
       }
     }
