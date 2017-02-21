@@ -43,7 +43,7 @@ class RangeAggregator(wholeRange: List[BigRange], coordinator: ActorRef, workDet
       stay()
 
     case Event(update: Update, AggregatorData(whole, _, _)) =>
-      sender() ! Ranges(whole.ranges)
+      sender() ! Ranges(whole.ranges, wholeRange.toString)
       stay()
 
     case Event(SetParentAggregator(pAggregator, details), data) if details == workDetails =>

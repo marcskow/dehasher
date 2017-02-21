@@ -6,7 +6,7 @@ sealed trait Result
 
 case class Cracked(dehashed: String) extends Result
 
-case class Ranges(ranges: List[BigRange]) extends Result
+case class Ranges(ranges: List[BigRange], wholeRange: String) extends Result
 
 case object NotFoundIt extends Result
 

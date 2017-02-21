@@ -10,7 +10,6 @@ import scala.concurrent.{ExecutionContextExecutor, Future}
   */
 class UpdateService(repository: UpdateRepository) extends Dehash {
   implicit val ctx: ExecutionContextExecutor = QueueSettings.ctx
-  val wholeRange: String = CoordinatorFSM.nrOfIterations(maxNrOfChars).toString
 
   def update(id: Int) = {
     val response = repository.update(id)
@@ -21,7 +20,7 @@ class UpdateService(repository: UpdateRepository) extends Dehash {
       case NonExisting => Response(4, "Task not existing")
       case range: Ranges =>
         val response: List[Range] = range.ranges.map(convertRespoonse)
-        UpdateResult(5, response, wholeRange)
+        UpdateResult(5, response, range.wholeRange)
     }
   }
 
