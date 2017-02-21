@@ -13,11 +13,11 @@ object Main extends RestRoutes {
 
 
   def main(args: Array[String]): Unit = {
-    //    startQueueSystem
-    args.headOption match {
-      case Some("Queue") => startQueueSystem()
-      case None => startCoordinatorSystem()
-    }
+        startQueueSystem
+//    args.headOption match {
+//      case Some("Queue") => startQueueSystem()
+//      case None => startCoordinatorSystem()
+//    }
   }
 
   def startQueueSystem(): Unit = {
@@ -35,7 +35,7 @@ object Main extends RestRoutes {
   }
 
   def startCoordinatorSystem(): Unit = {
-    lazy val remotePath: ActorPath = ActorPath.fromString("akka.tcp://QueueSystem@127.0.0.1:2552/user/queue")
+    lazy val remotePath: ActorPath = ActorPath.fromString("akka.tcp://Rest@127.0.0.1:2552/user/queue")
     val a_z = "abcdefghijklmnopqrstuvwxyz"
 
     val system =

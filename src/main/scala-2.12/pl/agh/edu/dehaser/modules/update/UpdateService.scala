@@ -12,7 +12,7 @@ class UpdateService(repository: UpdateRepository) extends Dehash {
   implicit val ctx: ExecutionContextExecutor = QueueSettings.ctx
   val wholeRange: String = CoordinatorFSM.nrOfIterations(maxNrOfChars).toString
 
-  def update(id: Int): Future[Product with Serializable] = {
+  def update(id: Int) = {
     val response = repository.update(id)
     response.map{
       case cracked: Cracked => Response(1, cracked.dehashed)
