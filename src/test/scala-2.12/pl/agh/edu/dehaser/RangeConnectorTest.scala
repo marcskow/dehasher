@@ -2,9 +2,9 @@ package pl.agh.edu.dehaser
 
 import org.scalatest.prop.{TableDrivenPropertyChecks, TableFor2}
 import org.scalatest.{FunSpecLike, GivenWhenThen, Matchers}
+import pl.agh.edu.dehaser.RangeImplicit._
 
 import scala.collection.immutable.NumericRange
-
 
 class RangeConnectorTest extends FunSpecLike with GivenWhenThen with Matchers with Dehash with TableDrivenPropertyChecks {
 

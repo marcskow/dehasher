@@ -1,9 +1,11 @@
 package pl.agh.edu.dehaser
 
 import akka.actor.{ActorRef, FSM, LoggingFSM, Props}
+import pl.agh.edu.dehaser.RangeImplicit._
 import pl.agh.edu.dehaser.messages._
 
 import scala.language.{implicitConversions, postfixOps}
+
 
 class RangeAggregator(wholeRange: List[BigRange], coordinator: ActorRef, workDetails: WorkDetails)
   extends FSM[AggregatorState, AggregatorData] with LoggingFSM[AggregatorState, AggregatorData] with Dehash {
@@ -13,7 +15,6 @@ class RangeAggregator(wholeRange: List[BigRange], coordinator: ActorRef, workDet
   setTimer("updates", UpdateTick, reloadTime, repeat = true)
 
   when(AggregatorStateImpl) {
-    // TODO:  if details == workDetails  might me redundant. Remove in final version
     case Event(RangeChecked(range, details), data@AggregatorData(whole, personalRange, _)) if details == workDetails =>
       val updated = whole.addRange(range)
       if (updated.contains(personalRange)) {

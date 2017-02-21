@@ -10,7 +10,7 @@ case class RangeConnector(ranges: List[BigRange] = List()) {
     rangeConnector.ranges.foldLeft(this) { case (conn, curr) => conn.addRange(curr) }
   }
 
-  def addRange(range: BigRange): RangeConnector = {
+  def addRange(range: BigRangeTrait): RangeConnector = {
     val bigRange = BigRange(range.start, range.end)
     val after = ranges.find { it => it.start <= range.end && range.end <= it.end }
     val before = ranges.find { it => it.start <= range.start && range.start <= it.end }

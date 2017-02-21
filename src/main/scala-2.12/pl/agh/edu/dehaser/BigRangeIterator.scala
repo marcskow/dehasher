@@ -2,11 +2,7 @@ package pl.agh.edu.dehaser
 
 import scala.collection.immutable.NumericRange
 
-case class BigRange(start: BigInt, end: BigInt) {
-  val length: BigInt = end - start
 
-  def contains(otherRange: BigRange): Boolean = otherRange.start >= start && otherRange.end <= end
-}
 
 case class BigRangeIterator(ranges: List[BigRange]) extends Dehash {
   val totalLength: BigInt = ranges.map(_.length).sum

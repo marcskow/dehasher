@@ -1,6 +1,5 @@
 package pl.agh.edu.dehaser
 
-import scala.collection.immutable.NumericRange
 import scala.concurrent.duration._
 import scala.language.{implicitConversions, postfixOps}
 
@@ -22,6 +21,5 @@ trait Dehash {
       map { case (char, index) => (char + 1) * Math.pow(alphabet.length, index) }.sum.toLong
   }
 
-  implicit def rangeToBigRange(range: NumericRange[BigInt]): BigRange = BigRange(range.start, range.end)
 
 }
