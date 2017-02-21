@@ -2,40 +2,31 @@ var newMaxForNormalization = 100;
 var initialReady;
 
 function handleClose(progressNumber, response) {
-    deleteProgressBar(progressNumber);
-}
-
-function handleClose2(progressNumber, response) {
     var code = parseInt(response["code"]);
     switch (code) {
         case 1: deleteProgressBar(progressNumber); break;
-        case 2: console.log("Task not started yet"); break; //TODO powinno być w takim razie tak że on sobie gdzieś zapisuje żeby go zamknąć
-        case 3: console.log("Task not existing");
-    }
-}
-
-function handleTaskUpdate2(progressNumber, response) {
-    var code;
-    if(!"code" in response) {
-        code = 5;
-    } else {
-        code = parseInt(response["code"]);
-    }
-    switch (code) {
-        case 1: solutionFound(progressNumber, response["solution"]); break;
-        case 2: solutionDoesNotExist(progressNumber); break;
-        case 3: console.log("Task not started yet"); break; //TODO powinno być w takim razie tak że on sobie gdzieś zapisuje żeby go zamknąć
-        case 4: console.log("Task not existing"); break;
-        case 5: handleTaskUpdate(progressNumber, response);
+        case 2: deleteProgressBar(progressNumber); break;
+        case 3: deleteProgressBar(progressNumber); break;
     }
 }
 
 function handleTaskUpdate(progressNumber, response) {
+    var code = parseInt(response["code"]);
+    switch (code) {
+        case 1: solutionFound(progressNumber, response["solution"]); break;
+        case 2: solutionDoesNotExist(progressNumber); break;
+        case 3: console.log(response["solution"]); break;
+        case 4: console.log(response["solution"]); break;
+        case 5: handleTaskUpdateRanges(progressNumber, response);
+    }
+}
+
+function handleTaskUpdateRanges(progressNumber, response) {
     var partials = response["partialRanges"];
-    var range = response["wholeRange"];
+    var range = parseInt(response["wholeRange"]);
 
     var segments = [];
-    if(parseInt(partials[0]["start"]) != 0){
+    if(partials[0]["start"] != 0){
         segments.push(0);
         initialReady = false;
     } else {
@@ -50,7 +41,7 @@ function handleTaskUpdate(progressNumber, response) {
     if(parseInt(partials[partials.length - 1]["end"]) != range){
         segments.push(range);
     }
-
+    console.log(segments);
     changeProgressBar(progressNumber, fillSegments(segments, range));
 }
 
@@ -93,4 +84,20 @@ function countReady(segmentsArray) {
         }
     }
     return result.toFixed(2);
+}
+
+function handleTaskListing(response) {
+    for(var i = 0; i < response.length; i++) {
+        addNewTaskDefined(response[i]["algoType"], response[i]["hash"], response[i]["range"]);
+        tasksIds[response[i]["hash"]] = response[i]["id"];
+    }
+
+    for(i = 0; i < response.length; i++){
+        for(var j = 0; j < response.length; j++) {
+            var task = document.getElementById("task" + j).value;
+            if (task == response[i]["hash"]) {
+                getTaskState(j);
+            }
+        }
+    }
 }

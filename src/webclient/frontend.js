@@ -1,5 +1,35 @@
+function setAddress() {
+    var addressInput = document.getElementById("addressInput").value;
+    var matches = true; // /[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/.test(addressInput);
+    if(matches) {
+        document.getElementById("addressInputContainer").className = "form-group has-success has-feedback";
+        document.getElementById("addressInputIcon").className = "glyphicon glyphicon-ok form-control-feedback";
+        address = addressInput;
+    } else {
+        document.getElementById("addressInputContainer").className = "form-group has-error has-feedback";
+        document.getElementById("addressInputIcon").className = "glyphicon glyphicon-remove form-control-feedback";
+    }
+}
+
+function setPort() {
+    var portInput = document.getElementById("portInput").value;
+    var matches = /[0-9]{1,5}/.test(portInput);
+    if(matches) {
+        document.getElementById("portInputContainer").className = "form-group has-success has-feedback";
+        document.getElementById("portInputIcon").className = "glyphicon glyphicon-ok form-control-feedback";
+        port = portInput;
+    } else {
+        document.getElementById("portInputContainer").className = "form-group has-error has-feedback";
+        document.getElementById("portInputIcon").className = "glyphicon glyphicon-remove form-control-feedback";
+    }
+}
+
 var progresses = 0;
 function addNewTask() {
+    addNewTaskDefined(getMethodType(), document.getElementById("task-body").value, getRangeLimit());
+}
+
+function addNewTaskDefined(methodType, hash, range) {
     document.getElementById("task-container-label").innerHTML = "";
 
     var tasks = parseInt(document.getElementById("progress-container").getElementsByTagName("div").length / 4);
@@ -11,11 +41,10 @@ function addNewTask() {
     updater.attach(new UpdateObserver(progresses));
     closer.attach(new CloseObserver(progresses));
 
-    var task = document.getElementById("task-body").value;
     document.getElementById("task-body").value = "Enter new task...";
     document.getElementById("progress-container").innerHTML += '<div id="task-container' + progresses + '"></div>';
-    document.getElementById("task-container" + progresses).innerHTML += ('<b>Method:</b> ' + getMethodType() + '<br /> <b>Task:</b> ');
-    document.getElementById("task-container" + progresses).innerHTML += '<div id="task' + progresses + '" style="word-break: break-all;">' + task + '</div><br />';
+    document.getElementById("task-container" + progresses).innerHTML += ('<b>Method:</b> ' + methodType + '  <b style="margin-left: 3px; margin-right: 3px;">Length limit:</b> ' + range + '<br /> <b>Task:</b> ');
+    document.getElementById("task-container" + progresses).innerHTML += '<div id="task' + progresses + '" style="word-break: break-all;">' + hash + '</div><br />';
     document.getElementById("task-container" + progresses).innerHTML += '<div class="progress" id="myProgress' + progresses + '" style="margin-bottom: 6px;"></div>';
     document.getElementById("task-container" + progresses).innerHTML += '<div id="label' + progresses + '">Your task is currently waiting...</div>';
     document.getElementById("task-container" + progresses).innerHTML += '<button id="close" style="float: right; width: 80px;" onclick="closeTask(' + progresses + ')">Close</button>';

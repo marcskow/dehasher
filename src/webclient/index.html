@@ -33,34 +33,64 @@
             Peer-to-peer Project
         </div>
     </div>
+
     <br />
 
     <div id="content" style="height: 960px;">
-
-        <h2 style="margin-bottom: 40px">Select method and add your new task:</h2>
-
-        <div style="float: left; margin-right: 40px">
-            <select id="method-dropdown" class="selectpicker" data-style="btn-primary" style="display: none; margin-right: 40px">
-                <option>SHA-1</option>
-                <option>SHA-256</option>
-                <option>MD-5</option>
-            </select>
-            <br />
-            <button id="autoupdate-button" type="button" class="btn btn-danger" onclick="autoupdate()">AutoUpdate Disabled</button>
+        <h2 style="margin-bottom: 40px">Global settings:</h2>
+        <div id="addressInputContainer" class="form-group has-error has-feedback" style="width: 40%">
+            <label class="col-sm-2 control-label" id="addressLabel" for="addressInput" style="width: 30%; margin-top: 3px;">Ip Address</label>
+            <div class="col-sm-10" style="width: 50%">
+                <input id="addressInput" type="text" class="form-control">
+                <span id="addressInputIcon" class="glyphicon glyphicon-remove form-control-feedback" style="margin-right: 20px"></span>
+            </div>
         </div>
-
-        <div class="input-group" style="width: 60%">
-            <textarea id="task-body" class="form-control custom-control" rows="3" style="resize:none">Enter new task...</textarea>
-            <span class="input-group-addon btn btn-primary" onclick="sendTaskAsynchronous()">Create</span>
+        <button type="button" class="btn btn-default" onclick="setAddress()">Set</button>
+        <br/>
+        <div id="portInputContainer" class="form-group has-error has-feedback" style="width: 40%; margin-top: 10px">
+            <label id="portLabel" class="col-sm-2 control-label" for="portInput" style="width: 30%; margin-top: 3px;">Port</label>
+            <div class="col-sm-10"  style="width: 50%; margin-top: 5px;">
+                <input id="portInput" type="text" class="form-control">
+                <span id="portInputIcon" class="glyphicon glyphicon-remove form-control-feedback" style="margin-right: 20px;"></span>
+            </div>
         </div>
+        <button type="button" class="btn btn-default" onclick="setPort()">Set</button>
+        <br />
         <br />
 
+        <div id="add-task-container">
+            <h2 style="margin-bottom: 40px">Select method and add your new task:</h2>
+
+            <div style="width: 25%; float: left; ">
+                <select id="method-dropdown" class="selectpicker" data-style="btn-primary" style="display: none;">
+                    <option>SHA-1</option>
+                    <option>SHA-256</option>
+                    <option>MD-5</option>
+                </select>
+            </div>
+            <div class="form-group" style="width: 40%; float: left;">
+                <input type="text" class="form-control" style="width: 40%; margin-top: 2px;" id="chars-limit" placeholder="Length limit">
+            </div>
+
+            <div class="input-group" style="width: 60%;">
+                <textarea id="task-body" class="form-control custom-control" rows="3" style="resize:none">Enter new task...</textarea>
+                <span class="input-group-addon btn btn-primary" onclick="sendTaskAsynchronous()">Create</span>
+            </div>
+        </div>
+
 
         <br />
-        <h2 style="margin-bottom: 30px">Inspect your task progress:</h2>
-        <div id="task-container-label"><p style="font-size: 14px">Currently there are no tasks created by you...</p></div>
+        <br />
+        <br />
 
-        <div id="progress-container" style="width: 90%; height: 150px; float: left;">
+        <div id="inspection-container">
+            <button type="button" class="btn btn-primary active" style="float: right;  margin-right: 190px; width: 170px;" onclick="listAllTasks()">List All Tasks</button>
+            <button id="autoupdate-button" type="button" class="btn btn-danger" style="float: right; margin-right: 50px;" onclick="autoupdate()">AutoUpdate Disabled</button>
+            <h2 style="margin-bottom: 30px">Inspect your task progress:</h2>
+            <div id="task-container-label"><p style="font-size: 14px">Currently there are no tasks created by you...</p></div>
+
+            <div id="progress-container" style="width: 90%; height: 150px; float: left;">
+            </div>
         </div>
 
     </div>

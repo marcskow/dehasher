@@ -57,10 +57,10 @@ img
 
 #menu
 {
-	background-color: white; %#90979F;
+	background-color: #114daa;
 	margin-top: 0px;
 	color: black;
-	padding: 10px; 
+	padding: 10px;
 }
 
 #topbar
@@ -68,17 +68,16 @@ img
 	background-color: #004c99;
 	color: white;
 	width: 100% - 20px;
-	padding: 10px;
+	padding: 5px;
 	margin-top: 15px;
 	margin-bottom: 15px;
-	height: 200px;
+	height: 155px;
 }
 
 #topbarL
 {
 	float: left;
 	width: 138px;
-	padding: 20px;
 	text-align: center;
 }
 
@@ -108,7 +107,7 @@ img
 
 #content
 {
-	padding: 80px;
+	padding: 50px 100px;
 	background-color: white; %#dedede;
 	text-align: justify;
 }
