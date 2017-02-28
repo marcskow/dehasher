@@ -6,17 +6,17 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.RouteResult
 import com.typesafe.config.ConfigFactory
 import pl.agh.edu.dehaser.backend.CoordinatorFSM
+import pl.agh.edu.dehaser.rest.RestRoutes
 import pl.agh.edu.dehaser.rest.modules.task.TaskRoutes
 import pl.agh.edu.dehaser.rest.modules.update.UpdateRoutes
-import pl.agh.edu.dehaser.rest.{QueueSettings, RestRoutes}
 
 object Main extends RestRoutes {
   lazy val allRoutes = List(TaskRoutes(), UpdateRoutes())
 
-
   def main(args: Array[String]): Unit = {
     args.headOption match {
-      case Some("Queue") => startQueueSystem()
+      case Some("queue") => startQueueSystem()
+      case Some("client") => DummyClient.startClientSystem()
       case None => startCoordinatorSystem()
     }
   }
@@ -25,7 +25,7 @@ object Main extends RestRoutes {
 
     import pl.agh.edu.dehaser.rest.QueueSettings._
     val routeFlow = RouteResult.route2HandlerFlow(controllers(allRoutes))
-    val bind = Http().bindAndHandle(routeFlow, QueueSettings.HOST, QueueSettings.PORT)
+    val bind = Http().bindAndHandle(routeFlow, Settings.hostname, Settings.restPort)
 
     import scala.util.{Failure, Success}
     bind.onComplete {
@@ -36,11 +36,10 @@ object Main extends RestRoutes {
   }
 
   def startCoordinatorSystem(): Unit = {
-    lazy val remotePath: ActorPath = ActorPath.fromString("akka.tcp://Rest@192.168.43.220:2552/user/queue")
+    lazy val remotePath: ActorPath = ActorPath.fromString(Settings.queuePath)
     val a_z = "abcdefghijklmnopqrstuvwxyz"
-    val config = ConfigFactory.load("coord")
     val system =
-      ActorSystem("coordinatorSystem", config)
+      ActorSystem("coordinatorSystem", ConfigFactory.load("coord"))
     system.actorOf(CoordinatorFSM.props(alphabet = a_z, queuePath = remotePath), "coordinator")
 
   }

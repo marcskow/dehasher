@@ -21,9 +21,9 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
 
 
   when(Idle, stateTimeout = idleReloadTime) {
-    case Event(DehashIt(hash, algo, id, originalSender, iterations), _) =>
+    case Event(DehashIt(hash, algo, id, originalSender, maxNrOfChars), _) =>
       log.info(s"\n\nI'm now master coordinator of: hash: $hash algo: $algo\n\n")
-      val wholeRange = BigRange(1, nrOfIterations(iterations))
+      val wholeRange = BigRange(1, nrOfIterations(maxNrOfChars))
       val details = WorkDetails(hash, algo)
       val aggregator = context.actorOf(RangeAggregator.props(List(wholeRange), self, details))
       goto(Master) using ProcessData(subContractors = Map.empty[ActorRef, List[BigRange]],
@@ -223,8 +223,4 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
 object CoordinatorFSM extends Dehash {
   def props(alphabet: String, nrOfWorkers: Int = 4, queuePath: ActorPath): Props =
     Props(new CoordinatorFSM(alphabet, nrOfWorkers, queuePath))
-
-  def nrOfIterations(maxStringSize: Int): BigInt = {
-    (1 to maxStringSize).map(x => BigInt(math.pow(defaultAlphabet.length, x).toLong)).sum
-  }
 }

@@ -7,14 +7,9 @@ import scala.concurrent.duration._
 import scala.language.{implicitConversions, postfixOps}
 
 trait Dehash {
-  // TODO: move these settings to config file
-  // TODO: testing value
-  val defaultAlphabet: String =
-  """abcdefghijklmnopqrstuvwxyz"""
 
   val atomSize = 50000
   val splitThreshold: Int = 20 * atomSize
-  val maxNrOfChars = 6
 
   // TODO: testing value
   val reloadTime: FiniteDuration = 1 seconds
