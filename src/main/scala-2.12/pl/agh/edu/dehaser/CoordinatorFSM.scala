@@ -25,7 +25,6 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
       val wholeRange = BigRange(1, nrOfIterations(iterations))
       val details = WorkDetails(hash, algo)
       val aggregator = context.actorOf(RangeAggregator.props(List(wholeRange), self, details))
-      // TODO: watxh  originalSender or not?
       goto(Master) using ProcessData(subContractors = Map.empty[ActorRef, List[BigRange]],
         details, BigRangeIterator(List(wholeRange)), parent = originalSender,
         masterCoordinator = self, aggregator)
@@ -35,7 +34,6 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
       stay()
 
     case Event(Invalid | StateTimeout, _) => goto(Idle)
-    // TODO: watch your parent!!!!!!!!!!!!!!!!!! 
     case Event(CheckHalf(range, details, master, parentAggregator), _) =>
       log.info(s"\n\nStarted processing chunk: $range, : details: $details\n\n")
       val aggregator = context.actorOf(RangeAggregator.props(range, self, details))
@@ -50,14 +48,14 @@ class CoordinatorFSM(alphabet: String, nrOfWorkers: Int, queuePath: ActorPath)
 
   when(Master) {
     case Event(FoundIt(crackedPass), ProcessData(subContractors, _, _, client, _, aggregator)) =>
-      client ! Cracked(crackedPass) //todo it this needed ?
+      client ! Cracked(crackedPass)
       subContractors.keys.foreach(_ ! CancelComputation)
       aggregator ! PoisonPill
       log.info(s"Found solution $crackedPass")
       goto(WaitingToDie) using Finished(Cracked(crackedPass))
 
     case Event(CheckedWholeRange, ProcessData(_, _, _, client, _, aggregator)) =>
-      client ! NotFoundIt //todo it this needed ?
+      client ! NotFoundIt
       aggregator ! PoisonPill
       goto(WaitingToDie) using Finished(NotFoundIt)
 

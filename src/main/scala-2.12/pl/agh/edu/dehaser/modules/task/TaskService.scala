@@ -5,9 +5,7 @@ import pl.agh.edu.dehaser.messages.DehashIt
 
 import scala.concurrent.{ExecutionContextExecutor, Future}
 
-/**
-  * Created by razakroner on 2017-02-16.
-  */
+
 class TaskService(repository: TaskRepository) {
   implicit val ctx: ExecutionContextExecutor = QueueSettings.ctx
 

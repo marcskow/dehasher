@@ -20,7 +20,6 @@ class RangeAggregator(wholeRange: List[BigRange], coordinator: ActorRef, workDet
         coordinator ! CheckedPersonalRange
         checkWholeRange(whole)
       }
-      //      log.info(s"checked: ${personal.ranges} out of: $personalRange [personal] ")
       stay() using data.copy(wholeRangeConnector = updated)
 
     case Event(UpdatedRanges(connector, details), data@AggregatorData(whole, _, _)) if details == workDetails =>

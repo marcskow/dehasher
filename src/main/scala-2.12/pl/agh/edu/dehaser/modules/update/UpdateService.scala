@@ -4,14 +4,13 @@ import pl.agh.edu.dehaser._
 import pl.agh.edu.dehaser.messages._
 
 import scala.concurrent.{ExecutionContextExecutor, Future}
+import scala.language.implicitConversions
 
-/**
-  * Created by razakroner on 2017-02-16.
-  */
+
 class UpdateService(repository: UpdateRepository) extends Dehash {
   implicit val ctx: ExecutionContextExecutor = QueueSettings.ctx
 
-  def update(id: Int) = {
+  def update(id: Int): Future[Product with Serializable] = {
     val response = repository.update(id)
     response.map{
       case cracked: Cracked => Response(1, cracked.dehashed)

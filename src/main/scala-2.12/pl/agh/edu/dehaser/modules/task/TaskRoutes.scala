@@ -2,16 +2,16 @@ package pl.agh.edu.dehaser.modules.task
 
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.server.Route
-import pl.agh.edu.dehaser.RestController
 import ch.megard.akka.http.cors.CorsDirectives._
-import scala.util.{Success, Failure}
+import pl.agh.edu.dehaser.RestController
 
-/**
-  * Created by razakroner on 2017-02-16.
-  */
+import scala.util.matching.Regex
+import scala.util.{Failure, Success}
+
+
 class TaskRoutes(taskService: TaskService) extends RestController{
   val uri = "task"
-  val regex = """[0-9]+""".r
+  val regex: Regex = """[0-9]+""".r
 
   override def gatherEndpoints: Route = cors() {
     path(uri) {

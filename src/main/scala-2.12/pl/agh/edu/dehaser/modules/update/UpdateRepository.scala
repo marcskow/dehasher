@@ -9,9 +9,7 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
-/**
-  * Created by razakroner on 2017-02-16.
-  */
+
 class UpdateRepository {
   implicit val timeout = Timeout(5 seconds)
 

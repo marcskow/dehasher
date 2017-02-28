@@ -1,21 +1,19 @@
 package pl.agh.edu.dehaser
 
-import akka.actor.{ActorSystem, Props}
+import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.stream.ActorMaterializer
-import com.typesafe.config.ConfigFactory
 
-/**
-  * Created by razakroner on 2017-02-18.
-  */
+import scala.concurrent.ExecutionContextExecutor
+
+
 
 object QueueSettings {
+  lazy val queue: ActorRef = system.actorOf(TaskQueue.props, "queue")
+  lazy val reporter: ActorRef = system.actorOf(Props[Reporter], "reporter")
+
+  lazy implicit val system = ActorSystem("Rest")
+  lazy implicit val materializer = ActorMaterializer()
+  lazy implicit val ctx: ExecutionContextExecutor = system.dispatcher
   val HOST = "192.168.0.192"
   val PORT = 9000
-  
-  implicit val system = ActorSystem("Rest")
-  implicit val materializer = ActorMaterializer()
-  implicit val ctx = system.dispatcher
-
-  val queue = system.actorOf(TaskQueue.props, "queue")
-  val reporter = system.actorOf(Props[Reporter], "reporter")
 }
