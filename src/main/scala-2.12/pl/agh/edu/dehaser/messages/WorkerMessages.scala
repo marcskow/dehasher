@@ -1,6 +1,6 @@
 package pl.agh.edu.dehaser.messages
 
-import pl.agh.edu.dehaser.algorithms.HashAlgorithm
+import pl.agh.edu.dehaser.backend.algorithms.HashAlgorithm
 
 import scala.collection.immutable.NumericRange
 

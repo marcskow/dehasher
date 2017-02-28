@@ -4,6 +4,7 @@ import akka.actor.{ActorSystem, Props}
 import akka.testkit.{ImplicitSender, TestKit}
 import org.scalatest._
 import org.scalatest.prop.TableDrivenPropertyChecks
+import pl.agh.edu.dehaser.backend.{Dehash, TaskQueue}
 import pl.agh.edu.dehaser.messages.{AskHim, DehashIt, GiveMeWork, OfferTask}
 
 class TaskQueueTest extends TestKit(ActorSystem("NodeActorSpec")) with ImplicitSender

@@ -4,6 +4,8 @@ import akka.actor.ActorSystem
 import akka.testkit.{ImplicitSender, TestKit, TestProbe}
 import org.scalatest._
 import org.scalatest.prop.TableDrivenPropertyChecks
+import pl.agh.edu.dehaser.backend.range.BigRange
+import pl.agh.edu.dehaser.backend.{CoordinatorFSM, Dehash}
 import pl.agh.edu.dehaser.messages._
 
 import scala.concurrent.duration._

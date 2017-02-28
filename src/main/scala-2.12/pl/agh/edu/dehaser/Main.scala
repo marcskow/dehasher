@@ -5,8 +5,10 @@ import akka.actor.{ActorPath, ActorSystem}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.RouteResult
 import com.typesafe.config.ConfigFactory
-import pl.agh.edu.dehaser.modules.task.TaskRoutes
-import pl.agh.edu.dehaser.modules.update.UpdateRoutes
+import pl.agh.edu.dehaser.backend.CoordinatorFSM
+import pl.agh.edu.dehaser.rest.modules.task.TaskRoutes
+import pl.agh.edu.dehaser.rest.modules.update.UpdateRoutes
+import pl.agh.edu.dehaser.rest.{QueueSettings, RestRoutes}
 
 object Main extends RestRoutes {
   lazy val allRoutes = List(TaskRoutes(), UpdateRoutes())
@@ -21,7 +23,7 @@ object Main extends RestRoutes {
 
   def startQueueSystem(): Unit = {
 
-    import QueueSettings._
+    import pl.agh.edu.dehaser.rest.QueueSettings._
     val routeFlow = RouteResult.route2HandlerFlow(controllers(allRoutes))
     val bind = Http().bindAndHandle(routeFlow, QueueSettings.HOST, QueueSettings.PORT)
 

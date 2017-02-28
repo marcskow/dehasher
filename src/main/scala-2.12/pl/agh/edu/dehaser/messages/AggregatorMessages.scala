@@ -1,7 +1,7 @@
 package pl.agh.edu.dehaser.messages
 
 import akka.actor.ActorRef
-import pl.agh.edu.dehaser.{BigRange, RangeConnector}
+import pl.agh.edu.dehaser.backend.range.{BigRange, RangeConnector}
 
 import scala.collection.immutable.NumericRange
 

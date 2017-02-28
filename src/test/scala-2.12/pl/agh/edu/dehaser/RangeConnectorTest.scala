@@ -2,6 +2,8 @@ package pl.agh.edu.dehaser
 
 import org.scalatest.prop.{TableDrivenPropertyChecks, TableFor2}
 import org.scalatest.{FunSpecLike, GivenWhenThen, Matchers}
+import pl.agh.edu.dehaser.backend.Dehash
+import pl.agh.edu.dehaser.backend.range.{BigRange, RangeConnector}
 
 import scala.collection.immutable.NumericRange
 

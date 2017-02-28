@@ -4,7 +4,8 @@ import akka.actor.ActorSystem
 import akka.testkit.{ImplicitSender, TestKit}
 import org.scalatest._
 import org.scalatest.prop.{TableDrivenPropertyChecks, TableFor6}
-import pl.agh.edu.dehaser.algorithms.AlgoProvider
+import pl.agh.edu.dehaser.backend.algorithms.AlgoProvider
+import pl.agh.edu.dehaser.backend.{Dehash, DehashWorker}
 import pl.agh.edu.dehaser.messages.{Check, FoundIt, RangeChecked, WorkDetails}
 
 import scala.collection.immutable.NumericRange.Inclusive

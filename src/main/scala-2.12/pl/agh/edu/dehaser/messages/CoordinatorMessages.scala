@@ -1,7 +1,7 @@
 package pl.agh.edu.dehaser.messages
 
 import akka.actor.ActorRef
-import pl.agh.edu.dehaser.BigRange
+import pl.agh.edu.dehaser.backend.range.BigRange
 
 
 // TODO: send original hash and algo or not?
