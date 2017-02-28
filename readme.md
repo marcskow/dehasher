@@ -1,14 +1,16 @@
-Instrukcja odpalenia w kilku terminalach:
+# Distributed password cracker
 
-Pierwszy terminal:
- sbt  "run-main pl.agh.edu.dehaser.Main Queue"
- 
- 
- Drugi terminal:
- 
- sbt  "run-main pl.agh.edu.dehaser.Main Client"
+Application written in Scala/Akka as an academic project.  
+
+## Running on single computer
+
+1. Start queue: `sbt "run queue"`
+2. Start one or more coordinators:  `sbt "run"`
+3. Start CLI client : `sbt "run client"` and follow instructions displayed on terminal
 
 
-Trzeci i więcej terminali:
+## Running on multiple computers
 
-sbt  "run-main pl.agh.edu.dehaser.Main"
+* Change `hostname` in `common.conf` to your public IP
+* Adjust `queuePath` to reference computer on which queue will be run 
+* Perform every step from  instruction in previous section on separate computer, but in shown order
