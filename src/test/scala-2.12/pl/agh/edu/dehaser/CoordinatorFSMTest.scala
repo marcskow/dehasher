@@ -34,7 +34,6 @@ class CoordinatorFSMTest extends TestKit(ActorSystem("NodeActorSpec")) with Impl
   }
 
   describe("Coordinator") {
-    // TODO: test splitting task
 
 
     it("should find solution") {
@@ -76,8 +75,8 @@ class CoordinatorFSMTest extends TestKit(ActorSystem("NodeActorSpec")) with Impl
       val coordinator = system.actorOf(CoordinatorFSM.props(a_z, queuePath = queue.ref.path), "coordinator")
       val range = BigRange(lalaRange, aaaaaaaRange)
 
-//      When("DehashIt message is sent")
-//      coordinator ! DehashIt("kjnkbbuyvb", "SHA-1", TestProbe().ref)
+      When("DehashIt message is sent")
+      coordinator ! DehashIt("kjnkbbuyvb", "SHA-1", taskId = 123, TestProbe().ref, maxIter = 8)
 
       Then("queue should get OfferTask msg")
       queue.fishForMessage(1 second) { case OfferTask => true; case _ => false }
