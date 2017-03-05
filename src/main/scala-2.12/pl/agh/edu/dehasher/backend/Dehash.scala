@@ -1,9 +1,8 @@
-package pl.agh.edu.dehaser.backend
+package pl.agh.edu.dehasher.backend
 
-import pl.agh.edu.dehaser.backend.range.BigRange
+import pl.agh.edu.dehasher.backend.range.BigRange
 
 import scala.collection.immutable.NumericRange
-import scala.concurrent.duration._
 import scala.language.{implicitConversions, postfixOps}
 
 trait Dehash {
@@ -11,8 +10,6 @@ trait Dehash {
   val atomSize = 50000
   val splitThreshold: Int = 20 * atomSize
 
-  // TODO: testing value
-  val reloadTime: FiniteDuration = 1 seconds
 
   def stringToNumber(word: String, alphabet: String): BigInt = {
     word.reverseIterator.map(char => alphabet.indexOf(char)).zipWithIndex.

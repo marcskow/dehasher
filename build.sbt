@@ -12,6 +12,7 @@ resolvers += Resolver.bintrayRepo("hseeberger", "maven")
 libraryDependencies ++= Seq(
   "org.scalatest" % "scalatest_2.12" % "3.0.1" % Test,
   "com.typesafe.akka" %% "akka-remote" % akkaVersion,
+  "com.typesafe.akka" %% "akka-cluster" % akkaVersion,
   "com.typesafe.akka" %% "akka-actor" % akkaVersion,
   "com.typesafe.akka" %% "akka-testkit" % akkaVersion,
 
@@ -31,4 +32,4 @@ libraryDependencies ++= Seq(
 // because DehashWorkerTest was failing in sbt
 parallelExecution in Test := false
 
-mainClass in(Compile, run) := Some("pl.agh.edu.dehaser.Main")
+mainClass in(Compile, run) := Some("pl.agh.edu.dehasher.Main")

@@ -1,6 +1,6 @@
-package pl.agh.edu.dehaser.messages
+package pl.agh.edu.dehasher.messages
 
-import pl.agh.edu.dehaser.backend.range.BigRange
+import pl.agh.edu.dehasher.backend.range.BigRange
 
 sealed trait Result
 

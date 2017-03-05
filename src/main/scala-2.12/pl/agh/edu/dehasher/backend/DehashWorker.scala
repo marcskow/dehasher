@@ -1,17 +1,21 @@
-package pl.agh.edu.dehaser.backend
+package pl.agh.edu.dehasher.backend
 
-import akka.actor.{Actor, Props}
-import pl.agh.edu.dehaser.messages._
+import java.math.BigInteger
+import java.security.MessageDigest
+
+import akka.actor.{Actor, ActorLogging}
+import pl.agh.edu.dehasher.messages._
 
 import scala.annotation.tailrec
 
-class DehashWorker(alphabet: String) extends Actor with Dehash {
+class DehashWorker extends Actor with Dehash with ActorLogging {
 
 
   override def receive: Receive = {
-    case Check(range, details@WorkDetails(hash, algo), hasher) =>
+    case Check(range, details@WorkDetails(hash, algo, alphabet)) =>
+      log.info(s"Processing: [worker] $range")
       val foundOption = range.map(x => getWord(x, alphabet, ""))
-        .map(x => x -> hasher.createHash(x)).find(x => x._2.equals(hash)).map(_._1)
+        .map(x => x -> hasher(x, algo)).find(x => x._2.equals(hash)).map(_._1)
       foundOption match {
         case Some(crackedPass) =>
           sender ! FoundIt(crackedPass)
@@ -33,9 +37,12 @@ class DehashWorker(alphabet: String) extends Actor with Dehash {
     }
   }
 
+  private def hasher(input: String, algo: String): String = {
+    val md = MessageDigest.getInstance(algo)
+    md.update(input.getBytes("UTF-8"))
+    val bytes = md.digest
+    val format = if (algo == "SHA-256") "%064x" else "%032x"
+    String.format(format, new BigInteger(1, bytes))
+  }
 
-}
-
-object DehashWorker {
-  def props(alphabet: String): Props = Props(new DehashWorker(alphabet))
 }
