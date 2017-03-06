@@ -4,6 +4,8 @@ Application written in Scala/Akka as an academic project.
 
 ## Running on single computer
 
+Perform every step on separate terminal in shown order:
+
 1. Start queue: `sbt "run queue"`
 2. Start one or more coordinators:  `sbt "run"`
 3. Start CLI client : `sbt "run client"` and follow instructions displayed on terminal
