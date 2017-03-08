@@ -4,6 +4,9 @@ import akka.actor.ActorSystem
 import akka.testkit.{ImplicitSender, TestKit, TestProbe}
 import org.scalatest._
 import org.scalatest.prop.TableDrivenPropertyChecks
+import pl.agh.edu.dehaser.backend.range.BigRange
+import pl.agh.edu.dehaser.backend.{CoordinatorFSM, Dehash}
+import pl.agh.edu.dehaser.messages._
 
 import scala.concurrent.duration._
 import scala.language.postfixOps
@@ -31,7 +34,6 @@ class CoordinatorFSMTest extends TestKit(ActorSystem("NodeActorSpec")) with Impl
   }
 
   describe("Coordinator") {
-    // TODO: test splitting task
 
 
     it("should find solution") {
@@ -74,7 +76,7 @@ class CoordinatorFSMTest extends TestKit(ActorSystem("NodeActorSpec")) with Impl
       val range = BigRange(lalaRange, aaaaaaaRange)
 
       When("DehashIt message is sent")
-      coordinator ! DehashIt("kjnkbbuyvb", "SHA-1", TestProbe().ref)
+      coordinator ! DehashIt("kjnkbbuyvb", "SHA-1", taskId = 123, TestProbe().ref, maxIter = 8)
 
       Then("queue should get OfferTask msg")
       queue.fishForMessage(1 second) { case OfferTask => true; case _ => false }
